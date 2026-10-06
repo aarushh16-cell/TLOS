@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id       String  @id @default(cuid())
+  username String  @unique
+  password String
+  role     String  @default("TEAM") // "ADMIN" or "TEAM"
+  team     Team?
+}
+
+model Team {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  balance  Float   @default(1000000)
+  userId   String  @unique
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  transactions Transaction[]
+  portfolio    PortfolioItem[]
+  decisions    TeamDecision[]
+}
+
+model Stock {
+  id              String @id @default(cuid())
+  symbol          String @unique
+  name            String
+  sector          String
+  totalShares     Int    @default(40000)
+  availableShares Int    @default(40000)
+  startPrice      Float  @default(100)
+  currentPrice    Float  @default(100)
+  riskProfile     String
+
+  transactions    Transaction[]
+  priceHistory    PriceHistory[]
+  portfolioItems  PortfolioItem[]
+}
+
+model PriceHistory {
+  id          String   @id @default(cuid())
+  stockSymbol String
+  price       Float
+  timestamp   DateTime @default(now())
+
+  stock       Stock    @relation(fields: [stockSymbol], references: [symbol], onDelete: Cascade)
+}
+
+model PortfolioItem {
+  id           String @id @default(cuid())
+  teamId       String
+  stockSymbol  String
+  shares       Int    @default(0)
+  currentPrice Float  @default(100)
+
+  team         Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  stock        Stock  @relation(fields: [stockSymbol], references: [symbol], onDelete: Cascade)
+
+  @@unique([teamId, stockSymbol])
+}
+
+model Transaction {
+  id                 String   @id @default(cuid())
+  teamId             String
+  stockSymbol        String
+  type               String   // "BUY" or "SELL"
+  shares             Int
+  priceAtTransaction Float
+  timestamp          DateTime @default(now())
+
+  team  Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  stock Stock @relation(fields: [stockSymbol], references: [symbol], onDelete: Cascade)
+}
+
+model SystemState {
+  id               String  @id @default("singleton")
+  currentPhase     String  @default("PORTFOLIO") // PORTFOLIO, EVENT_1, EVENT_2, etc.
+  isTradingEnabled Boolean @default(true)
+}
+
+model TeamDecision {
+  id      String  @id @default(cuid())
+  teamId  String
+  eventId Int
+  choice  String  // "A", "B", "C", etc.
+
+  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  @@unique([teamId, eventId])
+}
