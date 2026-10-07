@@ -33,9 +33,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await prisma.systemState.update({
+  await prisma.systemState.upsert({
     where: { id: 'singleton' },
-    data: { currentPhase: phase }
+    create: { id: 'singleton', currentPhase: phase },
+    update: { currentPhase: phase }
   })
   eventBus.emit('update', JSON.stringify({ type: 'PHASE_CHANGED', phase }))
 
