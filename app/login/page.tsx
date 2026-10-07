@@ -3,7 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, UserPlus, LogIn } from "lucide-react";
+import { Shield, UserPlus, LogIn, Eye, EyeOff, CheckCircle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,11 +12,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setSuccess("");
 
     if (isLogin) {
       const res = await signIn("credentials", {
@@ -46,6 +49,7 @@ export default function LoginPage() {
         const data = await res.json();
         
         if (res.ok) {
+          setSuccess("Account created successfully! Logging you in...");
           // Auto login after signup
           const signinRes = await signIn("credentials", {
             username,
@@ -70,8 +74,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)]">
-      <div className="w-full max-w-md p-8 dashboard-panel border border-[var(--border-color)]">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)] px-4">
+      <div className="w-full max-w-md p-6 sm:p-8 dashboard-panel border border-[var(--border-color)]">
         
         <div className="flex flex-col items-center mb-10">
           <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center border border-[var(--border-color)] mb-4">
@@ -86,8 +90,14 @@ export default function LoginPage() {
         </div>
         
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg mb-6 text-sm text-center">
+          <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg mb-6 text-sm text-center flex items-center justify-center gap-2">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-500 p-3 rounded-lg mb-6 text-sm text-center flex items-center justify-center gap-2">
+            <CheckCircle size={16} /> {success}
           </div>
         )}
 
@@ -104,16 +114,25 @@ export default function LoginPage() {
                 className="w-full bg-[var(--background)] border border-[var(--border-color)] rounded-lg p-3 text-zinc-200 focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
-            <div>
+            <div className="relative">
               <label className="text-sm font-medium text-zinc-400 block mb-2">Password</label>
-              <input 
-                type="password"
-                value={password} 
-                onChange={e => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                className="w-full bg-[var(--background)] border border-[var(--border-color)] rounded-lg p-3 text-zinc-200 focus:outline-none focus:border-emerald-500 transition-colors"
-              />
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"}
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="w-full bg-[var(--background)] border border-[var(--border-color)] rounded-lg p-3 text-zinc-200 focus:outline-none focus:border-emerald-500 transition-colors pr-10"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
           </div>
           
@@ -138,6 +157,7 @@ export default function LoginPage() {
             onClick={() => {
               setIsLogin(!isLogin);
               setError("");
+              setSuccess("");
             }}
             className="text-sm text-zinc-400 hover:text-emerald-400 transition-colors"
           >

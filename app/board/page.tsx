@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, Trophy, TrendingUp, TrendingDown, Clock, ShieldAlert, Newspaper, ChevronDown, ChevronUp } from "lucide-react";
+import { Activity, Trophy, TrendingUp, TrendingDown, Clock, ShieldAlert, Newspaper, ChevronDown, ChevronUp, Copy, CheckCircle2 } from "lucide-react";
 
 type Decision = { eventId: number, choice: string };
 type Transaction = { stockSymbol: string, shares: number, type: string, priceAtTransaction: number };
@@ -103,6 +103,12 @@ export default function BoardPage() {
     return () => clearInterval(interval);
   }, []);
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    // Could add a toast here, but simple alert or visual change works
+    alert(`Copied ${text} to clipboard!`);
+  };
+
   const allEvents = [...goodEvents, ...badEvents, finalEvent];
 
   return (
@@ -126,16 +132,16 @@ export default function BoardPage() {
         {/* PHASE VIEWS */}
         
         {(phase === 'PORTFOLIO' || phase === 'REVEAL_GOOD' || phase === 'REVEAL_BAD') && (
-          <div className="flex-1 p-10 flex flex-col items-center justify-center">
-             <h2 className="text-5xl font-black mb-16 tracking-tight text-center">Global Asset Valuation</h2>
-             <div className="grid grid-cols-3 gap-8 w-full max-w-6xl">
+          <div className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center">
+             <h2 className="text-3xl md:text-5xl font-black mb-8 md:mb-16 tracking-tight text-center">Global Asset Valuation</h2>
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 w-full max-w-6xl">
                {stocks.map(s => (
-                 <div key={s.symbol} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 flex flex-col items-center text-center shadow-2xl">
-                    <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">{s.sector}</span>
-                    <h3 className="text-5xl font-black mb-6">{s.symbol}</h3>
-                    <p className="text-6xl font-mono text-emerald-400 font-bold tracking-tighter mb-4">₹{s.currentPrice.toFixed(2)}</p>
-                    <p className="text-zinc-400 text-lg">Company Valuation</p>
-                    <p className="text-2xl font-mono font-bold text-white tracking-tight">₹{(s.currentPrice * 10000).toLocaleString()}</p>
+                 <div key={s.symbol} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 md:p-8 flex flex-col items-center text-center shadow-2xl">
+                    <span className="text-xs md:text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">{s.sector}</span>
+                    <h3 className="text-3xl md:text-5xl font-black mb-4 md:mb-6">{s.symbol}</h3>
+                    <p className="text-4xl md:text-6xl font-mono text-emerald-400 font-bold tracking-tighter mb-2 md:mb-4">₹{s.currentPrice.toFixed(2)}</p>
+                    <p className="text-zinc-400 text-base md:text-lg">Company Valuation</p>
+                    <p className="text-xl md:text-2xl font-mono font-bold text-white tracking-tight">₹{(s.currentPrice * 20000).toLocaleString()}</p>
                  </div>
                ))}
              </div>
@@ -143,22 +149,22 @@ export default function BoardPage() {
         )}
 
         {phase === 'GOOD_EVENTS' && (
-          <div className="flex-1 p-10 flex flex-col items-center justify-center bg-blue-900/10">
-             <div className="flex items-center gap-4 mb-10">
-               <Newspaper className="text-blue-500 w-16 h-16" />
-               <h2 className="text-6xl font-black tracking-tight text-blue-100">Breaking News & Opportunities</h2>
+          <div className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center bg-blue-900/10">
+             <div className="flex flex-col md:flex-row items-center gap-4 mb-10 text-center md:text-left">
+               <Newspaper className="text-blue-500 w-12 h-12 md:w-16 md:h-16" />
+               <h2 className="text-4xl md:text-6xl font-black tracking-tight text-blue-100">Breaking News & Opportunities</h2>
              </div>
              
              <div className="w-full max-w-5xl space-y-8">
                 {goodEvents.map((e, i) => (
-                  <div key={e.id} className="bg-zinc-900/80 border border-zinc-700 rounded-2xl p-8 flex shadow-2xl">
-                    <div className="w-24 h-24 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 font-black text-4xl mr-8 shrink-0">
+                  <div key={e.id} className="bg-zinc-900/80 border border-zinc-700 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row shadow-2xl">
+                    <div className="w-16 h-16 md:w-24 md:h-24 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 font-black text-2xl md:text-4xl mb-6 md:mb-0 md:mr-8 shrink-0">
                       {i + 1}
                     </div>
                     <div className="flex-1">
-                      <p className="text-zinc-400 font-bold uppercase tracking-widest mb-1">Target Asset: {e.target}</p>
-                      <h3 className="text-3xl font-black text-white mb-6 leading-tight">{e.title}</h3>
-                      <div className="grid grid-cols-3 gap-4">
+                      <p className="text-zinc-400 font-bold uppercase tracking-widest mb-1 text-sm">Target Asset: {e.target}</p>
+                      <h3 className="text-2xl md:text-3xl font-black text-white mb-6 leading-tight">{e.title}</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {e.options.map(o => (
                           <div key={o.id} className="bg-black/50 border border-zinc-800 p-4 rounded-lg flex flex-col items-center text-center">
                             <span className="text-sm font-bold text-zinc-500 mb-1">Option {o.id}</span>
@@ -175,22 +181,22 @@ export default function BoardPage() {
         )}
 
         {phase === 'BAD_EVENTS' && (
-          <div className="flex-1 p-10 flex flex-col items-center justify-center bg-red-900/10">
-             <div className="flex items-center gap-4 mb-10">
-               <ShieldAlert className="text-red-500 w-16 h-16 animate-pulse" />
-               <h2 className="text-6xl font-black tracking-tight text-red-100">Market Shocks & Crises</h2>
+          <div className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center bg-red-900/10">
+             <div className="flex flex-col md:flex-row items-center gap-4 mb-10 text-center md:text-left">
+               <ShieldAlert className="text-red-500 w-12 h-12 md:w-16 md:h-16 animate-pulse" />
+               <h2 className="text-4xl md:text-6xl font-black tracking-tight text-red-100">Market Shocks & Crises</h2>
              </div>
              
              <div className="w-full max-w-5xl space-y-8">
                 {badEvents.map((e, i) => (
-                  <div key={e.id} className="bg-zinc-900/80 border border-red-900/50 rounded-2xl p-8 flex shadow-2xl">
-                    <div className="w-24 h-24 bg-red-500/20 rounded-xl flex items-center justify-center text-red-400 font-black text-4xl mr-8 shrink-0">
+                  <div key={e.id} className="bg-zinc-900/80 border border-red-900/50 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row shadow-2xl">
+                    <div className="w-16 h-16 md:w-24 md:h-24 bg-red-500/20 rounded-xl flex items-center justify-center text-red-400 font-black text-2xl md:text-4xl mb-6 md:mb-0 md:mr-8 shrink-0">
                       {i + 4}
                     </div>
                     <div className="flex-1">
-                      <p className="text-red-400/80 font-bold uppercase tracking-widest mb-1">Target Asset: {e.target}</p>
-                      <h3 className="text-3xl font-black text-white mb-6 leading-tight">{e.title}</h3>
-                      <div className="grid grid-cols-3 gap-4">
+                      <p className="text-red-400/80 font-bold uppercase tracking-widest mb-1 text-sm">Target Asset: {e.target}</p>
+                      <h3 className="text-2xl md:text-3xl font-black text-white mb-6 leading-tight">{e.title}</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {e.options.map(o => (
                           <div key={o.id} className="bg-black/50 border border-red-900/30 p-4 rounded-lg flex flex-col items-center text-center">
                             <span className="text-sm font-bold text-red-500/70 mb-1">Option {o.id}</span>
@@ -207,15 +213,15 @@ export default function BoardPage() {
         )}
 
         {phase === 'FINAL_DECISION' && (
-          <div className="flex-1 p-10 flex flex-col items-center justify-center">
-             <h2 className="text-6xl font-black tracking-tight mb-4">Phase 3: Final Deployment</h2>
-             <p className="text-2xl text-zinc-400 mb-16">Teams must deploy remaining liquid cash reserves.</p>
+          <div className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center">
+             <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-4 text-center">Phase 3: Final Deployment</h2>
+             <p className="text-lg md:text-2xl text-zinc-400 mb-10 md:mb-16 text-center">Teams must deploy remaining liquid cash reserves.</p>
              
              <div className="w-full max-w-5xl">
-                <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-10 flex shadow-2xl">
+                <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 md:p-10 flex flex-col shadow-2xl">
                   <div className="flex-1">
-                    <h3 className="text-4xl font-black text-white mb-10 text-center leading-tight">{finalEvent.title}</h3>
-                    <div className="grid grid-cols-3 gap-6">
+                    <h3 className="text-2xl md:text-4xl font-black text-white mb-10 text-center leading-tight">{finalEvent.title}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
                       {finalEvent.options.map(o => (
                         <div key={o.id} className="bg-black border border-zinc-800 p-8 rounded-xl flex flex-col items-center text-center">
                           <span className="text-xl font-bold text-white mb-2">{o.label}</span>
@@ -230,31 +236,40 @@ export default function BoardPage() {
         )}
 
         {phase === 'END' && (
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-10 flex flex-col items-center">
-             <div className="flex items-center gap-4 mb-12 mt-10">
-               <Trophy className="text-yellow-400 w-20 h-20" />
-               <h2 className="text-7xl font-black tracking-tight text-white">Final Leaderboard</h2>
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10 flex flex-col items-center">
+             <div className="flex flex-col md:flex-row items-center gap-4 mb-8 md:mb-12 mt-6 md:mt-10 text-center md:text-left">
+               <Trophy className="text-yellow-400 w-16 h-16 md:w-20 md:h-20" />
+               <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white">Final Leaderboard</h2>
              </div>
              
              <div className="w-full max-w-5xl space-y-6">
                {leaderboard.map((team, idx) => {
                  const isWinner = idx === 0;
                  return (
-                   <div key={team.id} className={`bg-zinc-900 border ${isWinner ? 'border-yellow-500/50 shadow-[0_0_50px_rgba(234,179,8,0.2)]' : 'border-zinc-800'} rounded-2xl p-8`}>
-                      <div className="flex items-center justify-between">
-                         <div className="flex items-center gap-8">
-                           <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black ${isWinner ? 'bg-yellow-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
+                   <div key={team.id} className={`bg-zinc-900 border ${isWinner ? 'border-yellow-500/50 shadow-[0_0_50px_rgba(234,179,8,0.2)]' : 'border-zinc-800'} rounded-2xl p-6 md:p-8`}>
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                         <div className="flex items-center gap-4 md:gap-8">
+                           <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-3xl font-black shrink-0 ${isWinner ? 'bg-yellow-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
                              {idx + 1}
                            </div>
                            <div>
-                             {isWinner && <p className="text-yellow-500 font-bold tracking-widest uppercase text-sm mb-1 flex items-center gap-2"><Trophy size={14}/> Winner Crown</p>}
-                             <h3 className="text-4xl font-black text-white">{team.name}</h3>
+                             {isWinner && <p className="text-yellow-500 font-bold tracking-widest uppercase text-xs md:text-sm mb-1 flex items-center gap-2"><Trophy size={14}/> Winner Crown</p>}
+                             <div className="flex items-center gap-2 md:gap-3">
+                               <h3 className="text-2xl md:text-4xl font-black text-white">{team.name}</h3>
+                               <button 
+                                 onClick={() => copyToClipboard(team.name)}
+                                 className="text-zinc-500 hover:text-white transition-colors"
+                                 title="Copy Team Name"
+                               >
+                                 <Copy size={16} className="md:w-18 md:h-18" />
+                               </button>
+                             </div>
                            </div>
                          </div>
                          
-                         <div className="text-right">
-                           <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-1">Total Portfolio Value</p>
-                           <p className={`text-5xl font-mono font-black tracking-tight ${isWinner ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                         <div className="text-left md:text-right">
+                           <p className="text-xs md:text-sm font-bold text-zinc-500 uppercase tracking-widest mb-1">Total Portfolio Value</p>
+                           <p className={`text-3xl md:text-5xl font-mono font-black tracking-tight ${isWinner ? 'text-yellow-400' : 'text-emerald-400'}`}>
                              ₹{team.totalValue.toLocaleString()}
                            </p>
                            <p className="text-zinc-400 mt-2 font-mono text-sm">ROI: {((team.totalValue - 1000000) / 10000).toFixed(2)}%</p>

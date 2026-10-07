@@ -11,6 +11,16 @@ export async function POST(req: NextRequest) {
   const currentState = await prisma.systemState.findUnique({ where: { id: 'singleton' } })
 
   if (currentState?.currentPhase === 'PORTFOLIO' && phase !== 'PORTFOLIO') {
+    // Enforce Minimum Diversification Rule
+    const teams = await prisma.team.findMany({ include: { portfolio: true } });
+    const invalidTeams = teams.filter(t => t.portfolio.filter(p => p.shares > 0).length < 3);
+    if (invalidTeams.length > 0) {
+      return NextResponse.json({ 
+        success: false, 
+        error: `Cannot change phase. The following teams have not invested in at least 3 distinct companies: ${invalidTeams.map(t => t.name).join(', ')}` 
+      }, { status: 400 });
+    }
+
     // Lock in the final global market prices into each team's portfolio before event divergences
     const stocks = await prisma.stock.findMany();
     await prisma.$transaction(

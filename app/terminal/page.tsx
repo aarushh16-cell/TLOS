@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { Activity, Briefcase, Clock, Search, TrendingUp, TrendingDown, RefreshCcw, ShieldAlert, CheckCircle2, LogOut } from "lucide-react";
+import { Activity, Briefcase, Clock, Search, TrendingUp, TrendingDown, RefreshCcw, ShieldAlert, CheckCircle2, LogOut, Loader2, Menu, X, Eye, EyeOff } from "lucide-react";
 
 type Stock = { symbol: string, name: string, currentPrice: number, availableShares: number, sector: string, riskProfile: string };
 type Portfolio = { stockSymbol: string, shares: number, currentPrice: number, stock?: Stock };
@@ -40,6 +40,8 @@ export default function TerminalPage() {
   const [quantity, setQuantity] = useState<string>("");
   const [isTrading, setIsTrading] = useState(false);
   const [isTradingEnabled, setIsTradingEnabled] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showOutcomes, setShowOutcomes] = useState(false);
 
   const fetchState = () => {
     fetch('/api/team/state', { cache: 'no-store' }).then(res => res.json()).then(data => {
@@ -210,10 +212,10 @@ export default function TerminalPage() {
                       <div key={s.symbol} className="bg-black/50 p-4 rounded-lg border border-zinc-800">
                          <div className="flex justify-between items-center mb-2">
                            <span className="font-bold text-white">{s.symbol}</span>
-                           <span className="font-mono text-sm text-zinc-400">₹{(phase === 'PORTFOLIO' ? s.currentPrice : (portfolio.find(p => p.stockSymbol === s.symbol)?.currentPrice || s.currentPrice)).toFixed(2)}</span>
+                           <span className="font-mono text-sm text-zinc-400">₹{(portfolio.find(p => p.stockSymbol === s.symbol)?.currentPrice || s.currentPrice).toFixed(2)}</span>
                          </div>
                          <p className="text-xs text-zinc-500">Held: {held.toLocaleString()} shares</p>
-                         <p className="text-xs font-mono font-bold text-emerald-500 mt-1">Value: ₹{(held * (phase === 'PORTFOLIO' ? s.currentPrice : (portfolio.find(p => p.stockSymbol === s.symbol)?.currentPrice || s.currentPrice))).toLocaleString()}</p>
+                         <p className="text-xs font-mono font-bold text-emerald-500 mt-1">Value: ₹{(held * (portfolio.find(p => p.stockSymbol === s.symbol)?.currentPrice || s.currentPrice)).toLocaleString()}</p>
                       </div>
                     )
                   })}
@@ -224,45 +226,64 @@ export default function TerminalPage() {
       )}
 
       {/* HEADER */}
-      <header className="h-16 border-b border-[var(--border-color)] bg-[var(--panel-bg)] flex justify-between items-center px-6 shrink-0 shadow-sm z-10">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-zinc-800 rounded flex items-center justify-center font-bold text-white shadow-sm border border-zinc-700">T</div>
+      <header className="h-16 border-b border-[var(--border-color)] bg-[var(--panel-bg)] flex justify-between items-center px-4 sm:px-6 shrink-0 shadow-sm z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[var(--foreground)] rounded-lg flex items-center justify-center font-black text-[var(--background)] shadow-sm">T</div>
           <div>
-            <h1 className="font-semibold tracking-tight leading-tight">TLOS Markets</h1>
-            <div className="flex items-center gap-3 mt-1">
-              <p className="text-[10px] text-zinc-500 font-mono uppercase">{session?.user?.name} &bull; Phase: {phase.replace('_', ' ')}</p>
-              <button onClick={() => signOut({ callbackUrl: '/' })} className="text-[9px] font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded hover:bg-red-500 hover:text-white transition-all flex items-center gap-1" title="Log Out">
-                <LogOut size={10} /> Logout
+            <div className="flex items-center gap-2 sm:gap-3">
+              <h1 className="font-bold tracking-tight leading-tight text-sm sm:text-base">TLOS Markets</h1>
+              <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-sm">
+                {session?.user?.name}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
+              <p className="text-[10px] sm:text-[11px] text-zinc-500 font-mono uppercase truncate">Phase: <span className="font-semibold text-[var(--foreground)]">{phase.replace('_', ' ')}</span></p>
+              <button onClick={() => signOut({ callbackUrl: '/' })} className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center gap-1" title="Log Out">
+                <LogOut size={12} /> <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>
         </div>
         
-        <div className="flex items-center gap-12">
-           <div className="flex flex-col items-end">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-12">
+           <div className="hidden lg:flex flex-col items-end">
              <span className="text-[11px] text-zinc-500 uppercase font-semibold">Cash Reserve</span>
              <span className="font-mono font-medium text-emerald-400">₹{balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
            </div>
            <div className="flex flex-col items-end">
-             <span className="text-[11px] text-zinc-500 uppercase font-semibold">Active Portfolio</span>
-             <span className="font-mono font-medium text-white">{isDecisionPhase ? '---' : `₹${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</span>
+             <span className="text-[10px] sm:text-[11px] text-zinc-500 uppercase font-semibold">Total Net Worth</span>
+             <span className="font-mono text-sm sm:text-base font-medium text-white">{isDecisionPhase ? '---' : `₹${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</span>
            </div>
-           <div className="flex flex-col items-end">
+           <div className="hidden lg:flex flex-col items-end">
              <span className="text-[11px] text-zinc-500 uppercase font-semibold">Net Returns (P&L)</span>
              <span className={`font-mono font-medium ${isDecisionPhase ? 'text-zinc-500' : totalValue - 1000000 >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                {isDecisionPhase ? '---' : `${totalValue - 1000000 >= 0 ? '+' : '-'}₹${Math.abs(totalValue - 1000000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
              </span>
            </div>
+           
+           <button 
+             className="lg:hidden p-1.5 sm:p-2 text-zinc-400 hover:text-white"
+             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+           >
+             {mobileMenuOpen ? <X size={20} className="sm:w-6 sm:h-6" /> : <Menu size={20} className="sm:w-6 sm:h-6" />}
+           </button>
         </div>
       </header>
 
       {/* MAIN WORKSPACE */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden relative custom-scrollbar">
         
         {/* LEFT SIDEBAR: MARKETS */}
-        <div className="w-72 border-r border-[var(--border-color)] bg-[var(--panel-bg)] flex flex-col">
+        <div className={`${mobileMenuOpen ? 'flex absolute inset-0 z-40' : 'hidden'} lg:flex lg:relative w-full lg:w-72 border-b lg:border-b-0 lg:border-r border-[var(--border-color)] bg-[var(--panel-bg)] flex-col shrink-0 h-full`}>
           <div className="p-4 border-b border-[var(--border-color)]">
-            <h2 className="text-sm font-semibold mb-3">Markets</h2>
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-sm font-semibold">Markets</h2>
+              {mobileMenuOpen && (
+                <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden text-zinc-400 p-1">
+                  <X size={20} />
+                </button>
+              )}
+            </div>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-zinc-400" />
               <input 
@@ -277,14 +298,14 @@ export default function TerminalPage() {
                 <div 
                   key={stock.symbol} 
                   onClick={() => setActiveStockSymbol(stock.symbol)}
-                  className={`px-4 py-3 border-b border-[var(--border-color)] cursor-pointer flex justify-between items-center ${activeStock?.symbol === stock.symbol ? 'bg-zinc-800 border-l-2 border-l-white' : 'hover:bg-zinc-900 border-l-2 border-l-transparent'}`}
+                  className={`px-4 py-3 border-b border-[var(--border-color)] cursor-pointer flex justify-between items-center transition-colors ${activeStock?.symbol === stock.symbol ? 'bg-zinc-200 dark:bg-zinc-800 border-l-4 border-l-emerald-500' : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 border-l-4 border-l-transparent'}`}
                 >
                   <div>
-                     <p className="font-semibold text-sm">{stock.symbol}</p>
+                     <p className="font-semibold text-sm text-[var(--foreground)]">{stock.symbol}</p>
                      <p className="text-[11px] text-zinc-500">{stock.name}</p>
                   </div>
                   <div className="text-right">
-                     <p className="font-mono text-sm text-zinc-300">₹{stock.currentPrice.toFixed(2)}</p>
+                     <p className="font-mono text-sm text-[var(--foreground)] font-medium">₹{stock.currentPrice.toFixed(2)}</p>
                   </div>
                 </div>
              ))}
@@ -292,10 +313,10 @@ export default function TerminalPage() {
         </div>
 
         {/* CENTER: CHART & PORTFOLIO */}
-        <div className="flex-1 flex flex-col min-w-0 bg-[var(--background)]">
+        <div className="flex-1 flex flex-col min-w-0 bg-[var(--background)] shrink-0 h-auto lg:h-full">
           
           {/* CHART AREA */}
-          <div className="flex-[3] flex flex-col border-b border-[var(--border-color)] relative">
+          <div className="h-[400px] lg:h-auto lg:flex-[3] flex flex-col border-b border-[var(--border-color)] relative shrink-0">
              <div className="px-6 py-4 flex justify-between items-end relative z-10">
                <div>
                  <h2 className="text-2xl font-bold tracking-tight">{activeStock?.symbol}</h2>
@@ -354,7 +375,7 @@ export default function TerminalPage() {
           </div>
 
           {/* PORTFOLIO AREA */}
-          <div className="flex-[2] flex flex-col bg-[var(--panel-bg)]">
+          <div className="h-[350px] lg:h-auto lg:flex-[2] flex flex-col bg-[var(--panel-bg)] shrink-0">
             <div className="px-6 py-3 border-b border-[var(--border-color)] flex items-center justify-between">
               <h2 className="text-sm font-semibold flex items-center gap-2">
                 <Briefcase size={16} className="text-zinc-400" /> Holdings
@@ -392,7 +413,7 @@ export default function TerminalPage() {
         </div>
 
         {/* RIGHT SIDEBAR: ORDER EXECUTION OR EVENT SELECTION */}
-        <div className="w-80 border-l border-[var(--border-color)] bg-[var(--panel-bg)] flex flex-col">
+        <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-[var(--border-color)] bg-[var(--panel-bg)] flex flex-col shrink-0 lg:h-full">
           
           {phase === 'PORTFOLIO' && (
             <div className="p-6 flex flex-col h-full">
@@ -400,13 +421,13 @@ export default function TerminalPage() {
               
               <div className="flex rounded-md bg-[var(--background)] p-1 border border-[var(--border-color)] mb-6">
                 <button 
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-colors ${orderType === 'BUY' ? 'bg-zinc-800 text-white shadow border border-zinc-700' : 'text-zinc-500 hover:text-white'}`}
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-colors ${orderType === 'BUY' ? 'bg-[var(--foreground)] text-[var(--background)] shadow' : 'text-zinc-500 hover:text-[var(--foreground)] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                   onClick={() => setOrderType('BUY')}
                 >
                   Buy
                 </button>
                 <button 
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-colors ${orderType === 'SELL' ? 'bg-zinc-800 text-white shadow border border-zinc-700' : 'text-zinc-500 hover:text-white'}`}
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-colors ${orderType === 'SELL' ? 'bg-[var(--foreground)] text-[var(--background)] shadow' : 'text-zinc-500 hover:text-[var(--foreground)] hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
                   onClick={() => setOrderType('SELL')}
                 >
                   Sell
@@ -451,9 +472,9 @@ export default function TerminalPage() {
               <button 
                 onClick={handleTrade}
                 disabled={isTrading || parsedQty <= 0 || !isTradingEnabled}
-                className={`w-full py-4 text-white font-bold tracking-wide rounded-lg transition-all mt-4 shadow-md hover:shadow-lg ${!isTradingEnabled ? 'bg-zinc-700 opacity-50 cursor-not-allowed' : orderType === 'BUY' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-red-600 hover:bg-red-500'}`}
+                className={`w-full py-4 text-white font-bold tracking-wide rounded-lg transition-all mt-4 shadow-md hover:shadow-lg flex items-center justify-center gap-2 ${!isTradingEnabled ? 'bg-zinc-700 opacity-50 cursor-not-allowed' : orderType === 'BUY' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-red-600 hover:bg-red-500'}`}
               >
-                {!isTradingEnabled ? 'Market Frozen' : isTrading ? 'Processing...' : `${orderType === 'BUY' ? 'Place Buy Order' : 'Place Sell Order'}`}
+                {!isTradingEnabled ? 'Market Frozen' : isTrading ? <><Loader2 size={18} className="animate-spin" /> Processing...</> : `${orderType === 'BUY' ? 'Place Buy Order' : 'Place Sell Order'}`}
               </button>
             </div>
           )}
@@ -471,7 +492,17 @@ export default function TerminalPage() {
                     <p className="text-sm font-medium text-zinc-400 mb-6 bg-zinc-800/50 inline-block px-3 py-1 rounded-full border border-zinc-700">Target Asset: <span className="text-white font-bold">{activeGameEvent.target}</span></p>
                   )}
                   
-                  <p className="text-sm text-zinc-300 mb-8">Select your strategic response carefully. Your cash reserves will be deducted immediately, but market outcomes remain hidden until the phase ends.</p>
+                  <p className="text-sm text-zinc-300 mb-4">Select your strategic response carefully. Your cash reserves will be deducted immediately, but market outcomes remain hidden until the phase ends.</p>
+                  
+                  <div className="flex justify-end mb-4">
+                    <button 
+                      onClick={() => setShowOutcomes(!showOutcomes)} 
+                      className="text-xs bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 transition-colors"
+                    >
+                      {showOutcomes ? <EyeOff size={14} /> : <Eye size={14} />}
+                      {showOutcomes ? 'Hide Potential Outcomes' : 'Reveal Potential Outcomes'}
+                    </button>
+                  </div>
 
                   <div className="space-y-4">
                      {activeGameEvent.options.map((opt: any) => (
@@ -483,17 +514,22 @@ export default function TerminalPage() {
                       >
                          <div className="flex justify-between items-center mb-1">
                            <span className="font-bold text-white text-lg">{opt.label}</span>
-                           <span className="text-xs font-bold bg-zinc-900 px-2 py-1 rounded text-zinc-400">{opt.id}</span>
+                           <span className="text-xs font-bold bg-zinc-900 px-2 py-1 rounded text-zinc-400">
+                             {opt.id}
+                             {balance < opt.cost && <span className="ml-2 text-red-500 border border-red-500 px-1 rounded">Insufficient Cash</span>}
+                           </span>
                          </div>
                          <div className="font-mono text-sm text-zinc-400 mt-2 flex flex-col gap-1">
                             <div className="flex justify-between">
                               <span>Cost:</span>
                               <span className="text-white font-bold">₹{opt.cost.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between border-t border-zinc-700/50 pt-1 mt-1">
-                              <span>Outcome:</span>
-                              <span className="text-emerald-400 font-bold">{opt.effect}</span>
-                            </div>
+                            {showOutcomes && (
+                              <div className="flex justify-between border-t border-zinc-700/50 pt-2 mt-1">
+                                <span>Outcome:</span>
+                                <span className="text-emerald-400 font-bold">{opt.effect}</span>
+                              </div>
+                            )}
                          </div>
                       </button>
                     ))}

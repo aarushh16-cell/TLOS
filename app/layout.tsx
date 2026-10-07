@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { GlobalUI } from "@/components/GlobalUI";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,8 +18,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-black text-white antialiased`}>
-        <Providers>{children}</Providers>
+      <body className={`${inter.className} bg-[var(--background)] text-[var(--foreground)] antialiased transition-colors duration-300`} id="main-content">
+        <Providers>
+          {children}
+          <GlobalUI />
+        </Providers>
       </body>
     </html>
   );

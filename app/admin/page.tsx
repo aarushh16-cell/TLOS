@@ -25,6 +25,15 @@ export default function AdminPage() {
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
   const [stockForm, setStockForm] = useState({ symbol: '', name: '', sector: '', currentPrice: 100, riskProfile: 'LOW' });
 
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, message: string, onConfirm: () => void}>({
+    isOpen: false, message: '', onConfirm: () => {}
+  });
+
+  const requestConfirm = (message: string, onConfirm: () => void) => {
+    setConfirmModal({ isOpen: true, message, onConfirm });
+  };
+
   const fetchState = () => {
     fetch('/api/admin/state', { cache: 'no-store' }).then(res => res.json()).then(data => {
       setPhase(data.phase || 'PORTFOLIO');
@@ -41,16 +50,22 @@ export default function AdminPage() {
   }, []);
 
   const changePhase = async (newPhase: string) => {
-    if (!confirm(`Change phase to ${newPhase}?`)) return;
-    await fetch('/api/admin/phase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phase: newPhase }) });
-    fetchState();
+    requestConfirm(`Change phase to ${newPhase}?`, async () => {
+      const res = await fetch('/api/admin/phase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phase: newPhase }) });
+      const data = await res.json();
+      if (!res.ok || !data.success) alert(data.error || 'Failed to change phase');
+      fetchState();
+    });
   };
 
   const toggleTrading = async () => {
     const newState = !isTradingEnabled;
-    if (!confirm(`Are you sure you want to ${newState ? 'ENABLE' : 'DISABLE'} market trading?`)) return;
-    await fetch('/api/admin/trading', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isTradingEnabled: newState }) });
-    fetchState();
+    requestConfirm(`Are you sure you want to ${newState ? 'ENABLE' : 'DISABLE'} market trading?`, async () => {
+      const res = await fetch('/api/admin/trading', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isTradingEnabled: newState }) });
+      const data = await res.json();
+      if (!res.ok || !data.success) alert(data.error || 'Failed to toggle trading');
+      fetchState();
+    });
   };
 
   const resolvePhase = async (type: string) => {
@@ -68,26 +83,34 @@ export default function AdminPage() {
   };
   
   const deleteTeam = async (teamId: string, teamName: string) => {
-    if (!confirm(`Are you sure you want to permanently delete team "${teamName}"?`)) return;
-    setIsLoading(true);
-    await fetch('/api/admin/team', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamId }) });
-    fetchState();
-    setIsLoading(false);
+    requestConfirm(`Are you sure you want to permanently delete team "${teamName}"?`, async () => {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/team', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamId }) });
+      const data = await res.json();
+      if (!res.ok || !data.success) alert(data.error || 'Failed to delete team');
+      fetchState();
+      setIsLoading(false);
+    });
   };
   
   const resetPortfolio = async (teamId: string, teamName: string) => {
-    if (!confirm(`Reset portfolio for ${teamName === 'ALL' ? 'ALL TEAMS' : `"${teamName}"`}? This will refund their 1M balance and return their shares to the global supply.`)) return;
-    setIsLoading(true);
-    await fetch('/api/admin/reset-portfolio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamId }) });
-    fetchState();
-    setIsLoading(false);
+    requestConfirm(`Reset portfolio for ${teamName === 'ALL' ? 'ALL TEAMS' : `"${teamName}"`}? This will refund their 1M balance and return their shares to the global supply.`, async () => {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/reset-portfolio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamId }) });
+      const data = await res.json();
+      if (!res.ok || !data.success) alert(data.error || 'Failed to reset portfolio');
+      fetchState();
+      setIsLoading(false);
+    });
   };
   
   const saveStock = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     const body = editingStock ? { id: editingStock.id, ...stockForm } : stockForm;
-    await fetch('/api/admin/stock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await fetch('/api/admin/stock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok || !data.success) alert(data.error || 'Failed to save stock');
     setShowStockForm(false);
     setEditingStock(null);
     fetchState();
@@ -95,11 +118,14 @@ export default function AdminPage() {
   };
   
   const deleteStock = async (id: string, symbol: string) => {
-    if (!confirm(`Delete stock ${symbol}?`)) return;
-    setIsLoading(true);
-    await fetch('/api/admin/stock', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
-    fetchState();
-    setIsLoading(false);
+    requestConfirm(`Delete stock ${symbol}?`, async () => {
+      setIsLoading(true);
+      const res = await fetch('/api/admin/stock', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      const data = await res.json();
+      if (!res.ok || !data.success) alert(data.error || 'Failed to delete stock');
+      fetchState();
+      setIsLoading(false);
+    });
   }
 
   const openStockForm = (stock?: Stock) => {
@@ -117,6 +143,33 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans p-6 overflow-y-auto custom-scrollbar">
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[999999] flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4">Confirm Action</h3>
+            <p className="text-zinc-300 mb-8">{confirmModal.message}</p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2 bg-zinc-800 text-white rounded hover:bg-zinc-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  confirmModal.onConfirm();
+                  setConfirmModal({ ...confirmModal, isOpen: false });
+                }}
+                className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-500 font-bold transition-colors shadow-lg"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* HEADER */}
@@ -236,12 +289,13 @@ export default function AdminPage() {
                 <div className="space-y-2">
                   <button 
                     disabled={isLoading} 
-                    onClick={async () => {
-                      if (!confirm('Are you sure you want to reset ALL portfolios and balances to 1,000,000? This cannot be undone.')) return;
-                      setIsLoading(true);
-                      await fetch('/api/admin/reset', { method: 'POST' });
-                      fetchState();
-                      setIsLoading(false);
+                    onClick={() => {
+                      requestConfirm('Are you sure you want to reset ALL portfolios and balances to 1,000,000? This cannot be undone.', async () => {
+                        setIsLoading(true);
+                        await fetch('/api/admin/reset', { method: 'POST' });
+                        fetchState();
+                        setIsLoading(false);
+                      });
                     }} 
                     className="w-full py-2 text-sm flex items-center justify-center gap-2 shadow-sm font-semibold hover:bg-red-950 bg-black border border-red-900 rounded text-red-500"
                   >

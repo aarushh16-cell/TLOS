@@ -15,6 +15,84 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+:root.light {
+  --background: #f4f4f5;
+  --foreground: #09090b;
+  --panel-bg: #ffffff;
+  --border-color: #e4e4e7;
+}
+
+/* Light Mode Utility Overrides to fix hardcoded dark colors */
+:root.light .text-white {
+  color: #09090b !important;
+}
+
+:root.light .text-zinc-100,
+:root.light .text-zinc-200,
+:root.light .text-zinc-300,
+:root.light .text-zinc-400,
+:root.light .text-zinc-500 {
+  color: #3f3f46 !important;
+}
+
+:root.light .bg-zinc-800,
+:root.light .bg-zinc-900,
+:root.light .bg-black,
+:root.light .bg-black\/50 {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+}
+
+:root.light .border-zinc-700,
+:root.light .border-zinc-800 {
+  border-color: #e4e4e7 !important;
+}
+
+/* Ensure action buttons remain readable */
+:root.light .bg-emerald-500,
+:root.light .bg-emerald-600,
+:root.light .bg-red-500,
+:root.light .bg-red-600,
+:root.light .bg-blue-500,
+:root.light .bg-blue-600 {
+  color: #ffffff !important;
+}
+
+/* Invert landing page main button for contrast */
+:root.light .bg-white.text-black {
+  background-color: #09090b !important;
+  color: #ffffff !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+.skip-to-content {
+  position: absolute;
+  top: -1000px;
+  left: 20px;
+  z-index: 99999;
+  background: var(--accent-blue);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+.skip-to-content:focus {
+  top: 20px;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);

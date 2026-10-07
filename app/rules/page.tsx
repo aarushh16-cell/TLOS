@@ -1,7 +1,24 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Target, Activity, AlertTriangle, Trophy } from "lucide-react";
+import { ArrowLeft, BookOpen, Target, Activity, AlertTriangle, Trophy, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { useState } from "react";
 
 export default function RulesPage() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const toggleFaq = (index: number) => {
+    if (openFaq === index) setOpenFaq(null);
+    else setOpenFaq(index);
+  };
+
+  const faqs = [
+    { q: "Can we trade stocks after Phase 1?", a: "No. All purchasing happens strictly in Phase 1. Subsequent phases only allow you to hold, liquidate, or hedge based on event choices." },
+    { q: "What happens if we don't have enough cash for an event choice?", a: "The terminal will disable options you cannot afford. You will be forced to pick a cheaper alternative or 'Pass/Hold'." },
+    { q: "Is the simulation live?", a: "Yes, the admin progresses the phases in real-time, and your team must submit decisions before the timer expires." },
+    { q: "Can we collaborate with other teams?", a: "Collusion is forbidden. Each team must operate its own independent portfolio." }
+  ];
+
   return (
     <div className="min-h-screen bg-black text-white font-sans overflow-y-auto selection:bg-emerald-500/30">
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between">
@@ -91,7 +108,33 @@ export default function RulesPage() {
           </div>
         </section>
 
-        <div className="text-center mt-12 pb-12">
+        <section className="mb-16">
+          <h2 className="text-3xl font-black mb-6 flex items-center gap-3"><HelpCircle className="text-purple-500"/> 4. Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden transition-all">
+                <button 
+                  onClick={() => toggleFaq(idx)}
+                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-zinc-800/50 transition-colors text-left"
+                >
+                  <span className="font-bold text-white text-lg">{faq.q}</span>
+                  {openFaq === idx ? <ChevronUp className="text-zinc-500" /> : <ChevronDown className="text-zinc-500" />}
+                </button>
+                {openFaq === idx && (
+                  <div className="px-6 pb-4 pt-2 border-t border-zinc-800/50 text-zinc-400">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <div className="text-center mb-8 text-zinc-500 text-sm">
+          Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+        </div>
+
+        <div className="text-center mt-8 pb-12">
           <Link href="/login" className="inline-block px-12 py-4 bg-white text-black font-black text-lg tracking-widest uppercase rounded-full hover:bg-emerald-400 hover:text-white transition-all shadow-lg hover:shadow-emerald-500/20">
             Enter the Market
           </Link>

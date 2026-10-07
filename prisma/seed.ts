@@ -21,25 +21,6 @@ async function main() {
     }
   })
 
-  // Create 30 Teams
-  for (let i = 1; i <= 30; i++) {
-    const user = await prisma.user.create({
-      data: {
-        username: `team${i}`,
-        password: `team${i}pass`,
-        role: 'TEAM'
-      }
-    })
-    
-    await prisma.team.create({
-      data: {
-        name: `Team ${i}`,
-        balance: 1000000,
-        userId: user.id
-      }
-    })
-  }
-
   // Create the 6 Game Stocks
   const gameStocks = [
     { symbol: 'NOVA', name: 'NOVA (AI & Tech)', sector: 'AI & Tech', riskProfile: 'High Growth / High Risk' },
@@ -56,8 +37,8 @@ async function main() {
         symbol: st.symbol,
         name: st.name,
         sector: st.sector,
-        totalShares: 40000,
-        availableShares: 40000,
+        totalShares: 20000,
+        availableShares: 20000,
         startPrice: 100,
         currentPrice: 100,
         riskProfile: st.riskProfile
@@ -73,7 +54,7 @@ async function main() {
     })
   }
 
-  console.log("Seeding complete: 30 Teams and 6 Game Stocks created.")
+  console.log("Seeding complete: Admin and 6 Game Stocks created. (Teams will register via the login page)")
 }
 
 main()

@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
         if (stock.availableShares < shares) {
           throw new Error('Not enough shares available in the market')
         }
-        if (currentShares + shares > 10000) {
-          throw new Error(`Holding limit reached! You can only own a maximum of 10,000 shares of ${stock.symbol}.`)
+        if (currentShares + shares > 2000) {
+          throw new Error(`Holding limit reached! You can only own a maximum of 2,000 shares of ${stock.symbol}.`)
         }
         
         updatedTeam = await tx.team.update({ 
@@ -98,19 +98,9 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      // Simple price impact proportional to shares traded. 
-      // e.g. buying 1% of total supply (100 shares) increases price by 0.1% (factor 0.001)
-      const fractionTraded = shares / stock.totalShares;
-      const impactFactor = fractionTraded * 0.1; // Maximum 10% swing for buying 10,000 shares
-      const priceMultiplier = type === 'BUY' ? (1 + impactFactor) : (1 - impactFactor);
+      // No price impact during Phase 1 (PORTFOLIO phase). Prices remain fixed.
+      // Prices only change during events.
       
-      const newPrice = Math.max(1, stock.currentPrice * priceMultiplier);
-
-      await tx.stock.update({
-        where: { symbol: stock.symbol },
-        data: { currentPrice: newPrice }
-      });
-
       return { success: true }
     });
 
