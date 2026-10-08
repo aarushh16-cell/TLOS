@@ -2,13 +2,13 @@ import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 
-// Math Rules Reference:
+// Math Rules Reference (Updated):
 // Good 1: NOVA. A(Cost=300000, NOVA * 1.25), B(Cost=150000, NOVA * 1.12), C(Cost=0, NOVA * 1.0)
-// Good 2: VOLT+SHIPX. A(Cost=200000, VOLT*1.20, SHIPX*1.15), B(Cost=100000, VOLT*1.10, SHIPX*1.08), C(Cost=0, VOLT*1.0, SHIPX*1.0)
-// Good 3: FINCO+FRESH. A(Cost=250000, FINCO*1.18, FRESH*1.10), B(Cost=100000, FINCO*1.10, FRESH*1.04), C(Cost=0, FINCO*1.0, FRESH*1.0)
-// Bad 1: NOVA+FINCO. A(Cost=0, NOVA drop 30%, FINCO drop 12%). B(Cost=0, Exit NOVA @ 15% discount, FINCO drop 12%). C(Cost=150000, NOVA drop 5%, FINCO drop 0%)
-// Bad 2: VOLT+SHIPX. A(Cost=0, VOLT drop 25%, SHIPX drop 20%). B(Cost=0, Exit both @ 10% discount). C(Cost=120000, VOLT drop 5%, SHIPX +5%)
-// Bad 3: FRESH+MEDIX. A(Cost=0, FRESH drop 18%, MEDIX drop 15%). B(Cost=0, Exit both @ 8% discount). C(Cost=100000, FRESH drop 4%, MEDIX drop 2%)
+// Good 2: VOLT. A(Cost=200000, VOLT * 1.20), B(Cost=100000, VOLT * 1.10), C(Cost=0, VOLT * 0.98)
+// Good 3: FINCO. A(Cost=250000, FINCO * 1.22), B(Cost=100000, FINCO * 1.09), C(Cost=0, FINCO * 1.0)
+// Bad 1: NOVA. A(Cost=0, NOVA * 0.85). B(Cost=0, Exit NOVA). C(Cost=100000, NOVA * 1.15)
+// Bad 2: SHIPX. A(Cost=0, SHIPX * 0.88). B(Cost=0, Exit SHIPX). C(Cost=100000, SHIPX * 1.05)
+// Bad 3: FRESH. A(Cost=0, FRESH * 0.90). B(Cost=0, Exit FRESH). C(Cost=150000, FRESH * 1.08)
 
 export async function POST(req: NextRequest) {
   const session = await auth()
@@ -48,84 +48,57 @@ export async function POST(req: NextRequest) {
             if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * mult } });
           }
           
-          if (eventId === 2) { // Good Event 2: VOLT + SHIPX
-            let voltMult = choice === 'A' ? 1.20 : (choice === 'B' ? 1.10 : 1.0);
-            let shipxMult = choice === 'A' ? 1.15 : (choice === 'B' ? 1.08 : 1.0);
-            const pVolt = getPortfolio('VOLT');
-            const pShipx = getPortfolio('SHIPX');
-            if (pVolt) await tx.portfolioItem.update({ where: { id: pVolt.id }, data: { currentPrice: pVolt.currentPrice * voltMult } });
-            if (pShipx) await tx.portfolioItem.update({ where: { id: pShipx.id }, data: { currentPrice: pShipx.currentPrice * shipxMult } });
+          if (eventId === 2) { // Good Event 2: VOLT
+            let mult = choice === 'A' ? 1.20 : (choice === 'B' ? 1.10 : 0.98);
+            const p = getPortfolio('VOLT');
+            if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * mult } });
           }
           
-          if (eventId === 3) { // Good Event 3: FINCO + FRESH
-            let fincoMult = choice === 'A' ? 1.18 : (choice === 'B' ? 1.10 : 1.0);
-            let freshMult = choice === 'A' ? 1.10 : (choice === 'B' ? 1.04 : 1.0);
-            const pFinco = getPortfolio('FINCO');
-            const pFresh = getPortfolio('FRESH');
-            if (pFinco) await tx.portfolioItem.update({ where: { id: pFinco.id }, data: { currentPrice: pFinco.currentPrice * fincoMult } });
-            if (pFresh) await tx.portfolioItem.update({ where: { id: pFresh.id }, data: { currentPrice: pFresh.currentPrice * freshMult } });
+          if (eventId === 3) { // Good Event 3: FINCO
+            let mult = choice === 'A' ? 1.22 : (choice === 'B' ? 1.09 : 1.0);
+            const p = getPortfolio('FINCO');
+            if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * mult } });
           }
           
-          if (eventId === 4) { // Bad Event 1: NOVA + FINCO
-            const pNova = getPortfolio('NOVA');
-            const pFinco = getPortfolio('FINCO');
-            
-            if (choice === 'A') { // Hold
-              if (pNova) await tx.portfolioItem.update({ where: { id: pNova.id }, data: { currentPrice: pNova.currentPrice * 0.70 } }); // -30%
-              if (pFinco) await tx.portfolioItem.update({ where: { id: pFinco.id }, data: { currentPrice: pFinco.currentPrice * 0.88 } }); // -12%
-            } else if (choice === 'B') { // Exit NOVA
-              if (pNova) {
-                updatedBalance += (pNova.shares * (pNova.currentPrice * 0.85)); // 15% discount
-                await tx.portfolioItem.update({ where: { id: pNova.id }, data: { shares: 0 } });
+          if (eventId === 4) { // Bad Event 1: NOVA
+            const p = getPortfolio('NOVA');
+            if (choice === 'A') { // HOLD
+              if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 0.85 } });
+            } else if (choice === 'B') { // EXIT
+              if (p) {
+                updatedBalance += (p.shares * p.currentPrice);
+                await tx.portfolioItem.update({ where: { id: p.id }, data: { shares: 0 } });
               }
-              if (pFinco) await tx.portfolioItem.update({ where: { id: pFinco.id }, data: { currentPrice: pFinco.currentPrice * 0.88 } }); // -12%
-            } else if (choice === 'C') { // Protect
-              if (pNova) await tx.portfolioItem.update({ where: { id: pNova.id }, data: { currentPrice: pNova.currentPrice * 0.95 } }); // -5%
-              // FINCO unchanged
+            } else if (choice === 'C') { // DOUBLE_DOWN
+              if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 1.15 } });
             }
           }
 
-          if (eventId === 5) { // Bad Event 2: VOLT + SHIPX
-            const pVolt = getPortfolio('VOLT');
-            const pShipx = getPortfolio('SHIPX');
-            
-            if (choice === 'A') {
-              if (pVolt) await tx.portfolioItem.update({ where: { id: pVolt.id }, data: { currentPrice: pVolt.currentPrice * 0.75 } }); // -25%
-              if (pShipx) await tx.portfolioItem.update({ where: { id: pShipx.id }, data: { currentPrice: pShipx.currentPrice * 0.80 } }); // -20%
-            } else if (choice === 'B') { // Exit Both
-              if (pVolt) {
-                updatedBalance += (pVolt.shares * (pVolt.currentPrice * 0.90));
-                await tx.portfolioItem.update({ where: { id: pVolt.id }, data: { shares: 0 } });
+          if (eventId === 5) { // Bad Event 2: SHIPX
+            const p = getPortfolio('SHIPX');
+            if (choice === 'A') { // HOLD
+              if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 0.88 } });
+            } else if (choice === 'B') { // EXIT
+              if (p) {
+                updatedBalance += (p.shares * p.currentPrice);
+                await tx.portfolioItem.update({ where: { id: p.id }, data: { shares: 0 } });
               }
-              if (pShipx) {
-                updatedBalance += (pShipx.shares * (pShipx.currentPrice * 0.90));
-                await tx.portfolioItem.update({ where: { id: pShipx.id }, data: { shares: 0 } });
-              }
-            } else if (choice === 'C') { // Protect
-              if (pVolt) await tx.portfolioItem.update({ where: { id: pVolt.id }, data: { currentPrice: pVolt.currentPrice * 0.95 } }); // -5%
-              if (pShipx) await tx.portfolioItem.update({ where: { id: pShipx.id }, data: { currentPrice: pShipx.currentPrice * 1.05 } }); // +5%
+            } else if (choice === 'C') { // HEDGE
+              if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 1.05 } });
             }
           }
 
-          if (eventId === 6) { // Bad Event 3: FRESH + MEDIX
-            const pFresh = getPortfolio('FRESH');
-            const pMedix = getPortfolio('MEDIX');
-            
-            if (choice === 'A') {
-              if (pFresh) await tx.portfolioItem.update({ where: { id: pFresh.id }, data: { currentPrice: pFresh.currentPrice * 0.82 } }); // -18%
-              if (pMedix) await tx.portfolioItem.update({ where: { id: pMedix.id }, data: { currentPrice: pMedix.currentPrice * 0.85 } }); // -15%
-            } else if (choice === 'B') { // Exit Both
-              if (pFresh) {
-                updatedBalance += (pFresh.shares * (pFresh.currentPrice * 0.92)); // 8% discount
-                await tx.portfolioItem.update({ where: { id: pFresh.id }, data: { shares: 0 } });
+          if (eventId === 6) { // Bad Event 3: FRESH
+            const p = getPortfolio('FRESH');
+            if (choice === 'A') { // HOLD
+              if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 0.90 } });
+            } else if (choice === 'B') { // EXIT
+              if (p) {
+                updatedBalance += (p.shares * p.currentPrice);
+                await tx.portfolioItem.update({ where: { id: p.id }, data: { shares: 0 } });
               }
-              if (pMedix) {
-                updatedBalance += (pMedix.shares * (pMedix.currentPrice * 0.92));
-                await tx.portfolioItem.update({ where: { id: pMedix.id }, data: { shares: 0 } });
-              }
-            } else if (choice === 'C') { // Protect
-              if (pFresh) await tx.portfolioItem.update({ where: { id: pFresh.id }, data: { currentPrice: pFresh.currentPrice * 0.96 } }); // -4%
-              if (pMedix) await tx.portfolioItem.update({ where: { id: pMedix.id }, data: { currentPrice: pMedix.currentPrice * 0.98 } }); // -2%
+            } else if (choice === 'C') { // PIVOT
+              if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 1.08 } });
             }
           }
           
