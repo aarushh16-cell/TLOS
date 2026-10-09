@@ -91,3 +91,4 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Security Notes
 - Public sign-ups are disabled by design.
 - To set up your first **Admin account**, you can use Prisma Studio (`npx prisma studio`) to manually create a user in the `User` table with `role: "ADMIN"`. Once logged in, you can create the rest of the teams via the UI.
+- 
