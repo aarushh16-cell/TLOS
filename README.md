@@ -1,10 +1,10 @@
 # TLOS: The Market - Investment Simulation
 
-A full-stack interactive web application for managing the "TLOS: The Market" investment simulation game. Built with Next.js, React, TailwindCSS, and Prisma.
+A full-stack interactive web application for managing the "TLOS: The Market" investment simulation game. Built with Next.js 14, React, TailwindCSS, Prisma, and Auth.js.
 
 ## 1. Game Setup & Rules
 
-- **Teams:** Supports multiple competing teams via a secure login system.
+- **Teams:** Supports multiple competing teams via a secure, admin-controlled login system.
 - **Starting Capital:** Each team begins with **₹10,00,000** (10 Lakhs) liquid cash.
 - **Initial Stock Pool:** There are 6 fictional companies in the market, each starting with 10,000 shares at a base price of **₹100/share**:
   1. NOVA (AI & Tech)
@@ -46,14 +46,28 @@ The Admin ends the game, revealing the final leaderboard. The team with the high
 
 ## 3. Architecture & Interfaces
 
-1. **Admin / News Room Board (`/board` & `/admin`):**
-   - The Admin panel allows the moderator to freeze trading, switch phases, and "Resolve" events to calculate the hidden math.
-   - The Board is projected on the main hall screen. It displays the live breaking news scenarios for the events, and the final Leaderboard with expandable audit logs proving how each team achieved their score.
+1. **Admin Panel (`/admin`):**
+   - The Admin creates new teams and provides them with credentials (there is no public sign-up).
+   - Allows the moderator to freeze trading, switch phases, resolve events (calculating math), and audit team decisions.
+   
+2. **Main Board (`/board`):**
+   - Intended to be projected on the main hall screen. 
+   - Displays live breaking news scenarios and the final expandable Leaderboard.
 
-2. **Participant Terminal (`/terminal`):**
-   - A minimalist client where teams make their trades and decisions. It enforces strict cash validation and hides percentage gains/losses to prevent cheating. No mid-game trading is allowed once Phase 1 begins.
+3. **Participant Terminal (`/terminal`):**
+   - A secure, minimalist client where teams log in to make trades and submit event decisions.
+   - Strict server-side cash validation prevents cheating.
 
-## Getting Started (Local Development)
+## 4. Setup & Deployment (Next.js 14 App Router)
+
+### Environment Variables
+You must create a `.env.local` (for local development) with the following keys. In production (like Vercel), add these to your Project Settings:
+```env
+DATABASE_URL="postgres://your-postgres-url"
+AUTH_SECRET="a-secure-random-string-for-nextauth"
+```
+
+### Local Development
 
 1. **Install Dependencies:**
    ```bash
@@ -61,15 +75,19 @@ The Admin ends the game, revealing the final leaderboard. The team with the high
    ```
 
 2. **Initialize Database & Seed Data:**
+   *(Ensure your PostgreSQL database is running and `DATABASE_URL` is set)*
    ```bash
    npx prisma generate
    npx prisma db push
-   npx tsx prisma/seed.ts
    ```
 
-3. **Run the Development Server:**
+3. **Run the Server:**
    ```bash
    npm run dev
    ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the landing page.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Security Notes
+- Public sign-ups are disabled by design.
+- To set up your first **Admin account**, you can use Prisma Studio (`npx prisma studio`) to manually create a user in the `User` table with `role: "ADMIN"`. Once logged in, you can create the rest of the teams via the UI.
