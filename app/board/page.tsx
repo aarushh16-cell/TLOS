@@ -15,15 +15,15 @@ type Stock = {
 };
 
 const goodEvents = [
-  { id: 1, target: 'NOVA', title: 'AI Product Expansion', options: [{ id: 'A', label: 'Aggressive', cost: 300000 }, { id: 'B', label: 'Moderate', cost: 150000 }, { id: 'C', label: 'Pass', cost: 0 }] },
-  { id: 2, target: 'VOLT', title: 'Clean Energy Subsidy Grant', options: [{ id: 'A', label: 'Co-Invest', cost: 200000 }, { id: 'B', label: 'Standard', cost: 100000 }, { id: 'C', label: 'Pass', cost: 0 }] },
-  { id: 3, target: 'FINCO', title: 'Enterprise Banking Contract Win', options: [{ id: 'A', label: 'Fund Scale-Up', cost: 250000 }, { id: 'B', label: 'Maintain Capacity', cost: 100000 }, { id: 'C', label: 'Pass', cost: 0 }] }
+  { id: 1, target: 'NOVA', title: 'Enterprise AI Expansion', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain" }, { id: 'B', label: 'Moderate', costText: "25% of gain" }, { id: 'C', label: 'Pass', costText: "Free" }] },
+  { id: 2, target: 'VOLT', title: 'National EV Subsidy', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain" }, { id: 'B', label: 'Moderate', costText: "25% of gain" }, { id: 'C', label: 'Pass', costText: "Free" }] },
+  { id: 3, target: 'FINCO', title: 'Banking Rate Cut', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain" }, { id: 'B', label: 'Moderate', costText: "25% of gain" }, { id: 'C', label: 'Pass', costText: "Free" }] }
 ];
 
 const badEvents = [
-  { id: 4, target: 'NOVA', title: 'Data Privacy Regulation Shock', options: [{ id: 'A', label: 'HOLD', cost: 0 }, { id: 'B', label: 'EXIT (Liquidate)', cost: 0 }, { id: 'C', label: 'DOUBLE DOWN', cost: 100000 }] },
-  { id: 5, target: 'SHIPX', title: 'Fuel Price Spike & Route Disruption', options: [{ id: 'A', label: 'HOLD', cost: 0 }, { id: 'B', label: 'EXIT (Liquidate)', cost: 0 }, { id: 'C', label: 'HEDGE', cost: 100000 }] },
-  { id: 6, target: 'FRESH', title: 'Commodity Shortage Margin Squeeze', options: [{ id: 'A', label: 'HOLD', cost: 0 }, { id: 'B', label: 'EXIT (Liquidate)', cost: 0 }, { id: 'C', label: 'PIVOT', cost: 150000 }] }
+  { id: 4, target: 'NOVA', title: 'Privacy and Regulatory Crackdown', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop" }, { id: 'B', label: 'SELL HALF', costText: "8% Discount" }, { id: 'C', label: 'EXIT', costText: "8% Discount" }] },
+  { id: 5, target: 'SHIPX', title: 'Supply Chain and Tariff Spike', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop" }, { id: 'B', label: 'SELL HALF', costText: "8% Discount" }, { id: 'C', label: 'EXIT', costText: "8% Discount" }] },
+  { id: 6, target: 'FRESH', title: 'Raw Material and Price Caps', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop" }, { id: 'B', label: 'SELL HALF', costText: "8% Discount" }, { id: 'C', label: 'EXIT', costText: "8% Discount" }] }
 ];
 
 const finalEvent = { id: 7, target: 'ALL', title: 'Deploy Remaining Cash Balance', options: [{ id: 'PATH_1', label: 'Safe Asset', cost: 0 }, { id: 'PATH_2', label: 'Balanced Fund', cost: 0 }, { id: 'PATH_3', label: 'Aggressive Growth Play', cost: 0 }] };
@@ -169,7 +169,7 @@ export default function BoardPage() {
                           <div key={o.id} className="bg-black/50 border border-zinc-800 p-4 rounded-lg flex flex-col items-center text-center">
                             <span className="text-sm font-bold text-zinc-500 mb-1">Option {o.id}</span>
                             <span className="text-xl font-bold text-white mb-2">{o.label}</span>
-                            <span className="font-mono text-emerald-400 font-bold">Cost: ₹{o.cost.toLocaleString()}</span>
+                            <span className="font-mono text-emerald-400 font-bold">Cost: {o.costText}</span>
                           </div>
                         ))}
                       </div>
@@ -201,7 +201,7 @@ export default function BoardPage() {
                           <div key={o.id} className="bg-black/50 border border-red-900/30 p-4 rounded-lg flex flex-col items-center text-center">
                             <span className="text-sm font-bold text-red-500/70 mb-1">Option {o.id}</span>
                             <span className="text-xl font-bold text-white mb-2">{o.label}</span>
-                            <span className="font-mono text-red-400 font-bold">Cost: ₹{o.cost.toLocaleString()}</span>
+                            <span className="font-mono text-red-400 font-bold">{o.costText}</span>
                           </div>
                         ))}
                       </div>

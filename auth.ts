@@ -17,8 +17,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { username: credentials.username as string }
         })
         
-        if (!user || user.password !== credentials.password) return null
-
+        if (!user || user.password !== credentials.password) {
+          throw new Error("Account not found. Only pre-registered teams or existing accounts can sign in.")
+        }
         const team = await prisma.team.findUnique({ where: { userId: user.id } })
 
         return {

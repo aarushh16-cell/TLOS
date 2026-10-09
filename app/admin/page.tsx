@@ -2,10 +2,11 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { Users, Activity, ShieldAlert, BarChart3, Settings2, Power, Building, Trash2, Edit2, Plus, RefreshCcw } from "lucide-react";
+import { Users, Activity, ShieldAlert, BarChart3, Settings2, Power, Building, Trash2, Edit2, Plus, RefreshCcw, Trophy } from "lucide-react";
 
 type LeaderboardTeam = {
-  id: string, name: string, balance: number, portfolioValue: number, totalValue: number, userId: string
+  id: string, name: string, balance: number, portfolioValue: number, totalValue: number, userId: string,
+  portfolio: any[], transactions: any[], decisions: any[]
 };
 
 type Stock = {
@@ -24,6 +25,11 @@ export default function AdminPage() {
   const [showStockForm, setShowStockForm] = useState(false);
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
   const [stockForm, setStockForm] = useState({ symbol: '', name: '', sector: '', currentPrice: 100, riskProfile: 'LOW' });
+
+  // Inspector & Evaluator
+  const [inspectingTeam, setInspectingTeam] = useState<LeaderboardTeam | null>(null);
+  const [judgeBonus, setJudgeBonus] = useState<number>(0);
+  const [evaluations, setEvaluations] = useState<any[] | null>(null);
 
   // Confirmation Modal State
   const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, message: string, onConfirm: () => void}>({
@@ -70,15 +76,25 @@ export default function AdminPage() {
 
   const resolvePhase = async (type: string) => {
     setIsLoading(true);
-    const res = await fetch('/api/admin/resolve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type }) });
-    const data = await res.json();
-    fetchState();
-    setIsLoading(false);
-    
-    if (data.success) {
-      alert(`Success! Processed ${data.processedDecisions} team decisions for ${type} phase.`);
-    } else {
-      alert(`Error processing resolutions: ${data.error}`);
+    try {
+      const res = await fetch('/api/admin/resolve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type }) });
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        throw new Error('Server returned an invalid response (500 Error)');
+      }
+      
+      if (data.success) {
+        alert(`Success! Processed ${data.processedDecisions} team decisions for ${type} phase.`);
+      } else {
+        alert(`Error processing resolutions: ${data.error}`);
+      }
+    } catch (err: any) {
+      alert(`Request failed: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+      fetchState();
     }
   };
   
@@ -126,6 +142,28 @@ export default function AdminPage() {
       fetchState();
       setIsLoading(false);
     });
+  }
+
+  const saveJudgeBonus = async (teamId: string) => {
+    setIsLoading(true);
+    const res = await fetch('/api/admin/judge-bonus', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamId, bonus: judgeBonus }) });
+    const data = await res.json();
+    if (!res.ok || !data.success) alert(data.error || 'Failed to save Judge Bonus');
+    else alert('Judge Bonus saved!');
+    fetchState();
+    setIsLoading(false);
+  }
+
+  const evaluateFinalScores = async () => {
+    setIsLoading(true);
+    const res = await fetch('/api/admin/evaluate');
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      alert(data.error || 'Failed to evaluate');
+    } else {
+      setEvaluations(data.evaluations);
+    }
+    setIsLoading(false);
   }
 
   const openStockForm = (stock?: Stock) => {
@@ -223,6 +261,9 @@ export default function AdminPage() {
                       <td className="py-3 px-6 text-right font-mono font-bold text-white">₹{team.totalValue.toLocaleString()}</td>
                       <td className="py-3 px-6 text-right">
                         <div className="flex justify-end gap-3">
+                          <button onClick={() => setInspectingTeam(team)} className="text-emerald-400 hover:text-emerald-300 transition-colors p-1" title="Inspect Team">
+                             <Activity size={16} />
+                          </button>
                           <button onClick={() => resetPortfolio(team.id, team.name)} className="text-blue-400 hover:text-blue-300 transition-colors p-1" title="Reset Portfolio">
                              <RefreshCcw size={16} />
                           </button>
@@ -282,6 +323,13 @@ export default function AdminPage() {
                     className="w-full py-2 text-sm flex items-center justify-center gap-2 shadow-sm font-semibold hover:bg-blue-800 bg-blue-900 border border-blue-700 rounded text-white"
                   >
                     Resolve Final Decision
+                  </button>
+                  <button 
+                    disabled={isLoading} 
+                    onClick={evaluateFinalScores} 
+                    className="w-full py-2 text-sm flex items-center justify-center gap-2 shadow-sm font-semibold hover:bg-purple-800 bg-purple-900 border border-purple-700 rounded text-white mt-4"
+                  >
+                    Evaluate Final 100-pt Score
                   </button>
                 </div>
                 
@@ -401,6 +449,109 @@ export default function AdminPage() {
         </div>
 
       </div>
+
+      {/* Team Inspector Modal */}
+      {inspectingTeam && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl max-w-3xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-white flex items-center gap-2"><Activity /> Inspect Team: {inspectingTeam.name}</h3>
+              <button onClick={() => setInspectingTeam(null)} className="text-zinc-500 hover:text-white">✕</button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div className="bg-zinc-800 p-4 rounded-lg">
+                <p className="text-zinc-400 text-sm font-bold uppercase mb-1">Liquid Cash</p>
+                <p className="text-2xl font-mono text-emerald-400">₹{inspectingTeam.balance.toLocaleString()}</p>
+              </div>
+              <div className="bg-zinc-800 p-4 rounded-lg">
+                <p className="text-zinc-400 text-sm font-bold uppercase mb-1">Portfolio Value</p>
+                <p className="text-2xl font-mono text-blue-400">₹{inspectingTeam.portfolioValue.toLocaleString()}</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h4 className="font-bold text-white mb-3">Portfolio Details</h4>
+              <table className="w-full text-sm text-left">
+                <thead className="text-zinc-500 border-b border-zinc-700">
+                  <tr><th>Asset</th><th>Shares</th><th>Valuation</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                  {inspectingTeam.portfolio?.map((p, i) => (
+                    <tr key={i} className="border-b border-zinc-800">
+                      <td className="py-2 text-white">{p.stockSymbol}</td>
+                      <td className="py-2 text-zinc-300 font-mono">{p.shares}</td>
+                      <td className="py-2 text-emerald-400 font-mono">₹{(p.currentPrice || 0).toLocaleString()}</td>
+                      <td className="py-2 text-blue-400 font-mono">₹{(p.shares * (p.currentPrice || 0)).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="bg-purple-900/20 border border-purple-500/30 p-4 rounded-lg flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-purple-400">Judge Bonus (0-3 Points)</h4>
+                <p className="text-xs text-purple-300/70">Awarded for analysis, presentation, and teamwork.</p>
+              </div>
+              <div className="flex gap-2 items-center">
+                <input 
+                  type="number" 
+                  min="0" max="3" 
+                  value={judgeBonus} 
+                  onChange={e => setJudgeBonus(parseInt(e.target.value) || 0)}
+                  className="bg-zinc-900 border border-purple-500/50 rounded px-3 py-1 w-20 text-white outline-none focus:border-purple-400"
+                />
+                <button onClick={() => saveJudgeBonus(inspectingTeam.id)} className="bg-purple-600 hover:bg-purple-500 text-white font-bold px-4 py-1 rounded transition">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Evaluation Leaderboard Modal */}
+      {evaluations && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] flex flex-col items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl w-full max-w-6xl shadow-2xl flex flex-col max-h-[95vh]">
+            <div className="p-6 border-b border-zinc-800 flex justify-between items-center bg-black/50 rounded-t-2xl">
+              <h3 className="text-3xl font-black text-white flex items-center gap-3">Final 100-Point Evaluation</h3>
+              <button onClick={() => setEvaluations(null)} className="text-zinc-500 hover:text-white font-bold text-xl">✕</button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+              <table className="w-full text-left text-sm">
+                <thead className="text-zinc-400 border-b border-zinc-700 sticky top-0 bg-zinc-900">
+                  <tr>
+                    <th className="py-3 px-4 font-bold uppercase tracking-wider">Rank</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-wider">Team</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-wider text-right">Net Worth (Tiebreaker)</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-wider text-center text-emerald-400" title="Max 50">Financial (50)</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-wider text-center text-blue-400" title="Max 30">Decision (30)</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-wider text-center text-red-400" title="Max 20">Risk (20)</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-wider text-center text-purple-400" title="Max 3">Bonus (3)</th>
+                    <th className="py-3 px-4 font-bold uppercase tracking-wider text-right text-yellow-400">Total Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {evaluations.map((team, idx) => (
+                    <tr key={team.id} className="border-b border-zinc-800/50 hover:bg-zinc-800 transition-colors">
+                      <td className="py-4 px-4 text-zinc-300 font-bold text-lg">{idx + 1}</td>
+                      <td className="py-4 px-4 font-bold text-white text-lg">{team.name}</td>
+                      <td className="py-4 px-4 text-right font-mono text-zinc-400">₹{team.netWorth.toLocaleString()}</td>
+                      <td className="py-4 px-4 text-center font-mono font-bold text-emerald-400 text-lg">{team.financialReturnScore}</td>
+                      <td className="py-4 px-4 text-center font-mono font-bold text-blue-400 text-lg">{team.decisionPoints}</td>
+                      <td className="py-4 px-4 text-center font-mono font-bold text-red-400 text-lg">{team.riskPoints}</td>
+                      <td className="py-4 px-4 text-center font-mono font-bold text-purple-400 text-lg">+{team.judgeBonus}</td>
+                      <td className="py-4 px-4 text-right font-mono font-black text-yellow-400 text-2xl">{team.finalScore}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

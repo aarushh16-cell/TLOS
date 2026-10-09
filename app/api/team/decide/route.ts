@@ -4,15 +4,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 
 const eventLogic: Record<number, any> = {
-  // Good Events
-  1: { target: 'NOVA',  type: 'growth', choices: { A: { cost: 300000, mult: 1.25 }, B: { cost: 150000, mult: 1.12 }, C: { cost: 0, mult: 1.00 } } },
-  2: { target: 'VOLT',  type: 'growth', choices: { A: { cost: 200000, mult: 1.20 }, B: { cost: 100000, mult: 1.10 }, C: { cost: 0, mult: 0.98 } } },
-  3: { target: 'FINCO', type: 'growth', choices: { A: { cost: 250000, mult: 1.22 }, B: { cost: 100000, mult: 1.09 }, C: { cost: 0, mult: 1.00 } } },
-  // Bad Events
-  4: { target: 'NOVA',  type: 'shock', choices: { A: { action: 'HOLD', cost: 0, mult: 0.85 }, B: { action: 'EXIT', cost: 0, mult: 1.00 }, C: { action: 'DOUBLE_DOWN', cost: 100000, mult: 1.15 } } },
-  5: { target: 'SHIPX', type: 'shock', choices: { A: { action: 'HOLD', cost: 0, mult: 0.88 }, B: { action: 'EXIT', cost: 0, mult: 1.00 }, C: { action: 'HEDGE', cost: 100000, mult: 1.05 } } },
-  6: { target: 'FRESH', type: 'shock', choices: { A: { action: 'HOLD', cost: 0, mult: 0.90 }, B: { action: 'EXIT', cost: 0, mult: 1.00 }, C: { action: 'PIVOT', cost: 150000, mult: 1.08 } } },
-  // Final Decision
+  // Good Events (G1, G2, G3) - Moves are percentages. Fees are calculated dynamically (25% of the gain).
+  1: { target: 'NOVA',  type: 'growth', choices: { A: { move: 0.30 }, B: { move: 0.15 }, C: { move: 0.00 } } },
+  2: { target: 'VOLT',  type: 'growth', choices: { A: { move: 0.22 }, B: { move: 0.11 }, C: { move: 0.00 } } },
+  3: { target: 'FINCO', type: 'growth', choices: { A: { move: 0.18 }, B: { move: 0.09 }, C: { move: 0.00 } } },
+  // Bad Events (B1, B2, B3)
+  4: { target: 'NOVA',  type: 'shock', choices: { A: { action: 'HOLD' }, B: { action: 'SELL_HALF' }, C: { action: 'EXIT' } } },
+  5: { target: 'SHIPX', type: 'shock', choices: { A: { action: 'HOLD' }, B: { action: 'SELL_HALF' }, C: { action: 'EXIT' } } },
+  6: { target: 'FRESH', type: 'shock', choices: { A: { action: 'HOLD' }, B: { action: 'SELL_HALF' }, C: { action: 'EXIT' } } },
+  // Final Decision (Note: v6 doesn't specify options for Event 7 explicitly beyond what's in the guide, keeping as is)
   7: { target: 'ALL', type: 'final', choices: { PATH_1: { action: 'SAFE' }, PATH_2: { action: 'BALANCED' }, PATH_3: { action: 'AGGRESSIVE' } } }
 };
 
@@ -33,27 +33,46 @@ export async function POST(req: NextRequest) {
       const choiceData = logic.choices[choice]
       if (!choiceData) throw new Error("Invalid choice")
         
-      const team = await tx.team.findUnique({ where: { id: teamId } })
+      const team = await tx.team.findUnique({ 
+        where: { id: teamId },
+        include: { portfolio: true }
+      })
       if (!team) throw new Error("Team not found")
 
       // Prevent duplicate decisions
       const existingDecision = await tx.teamDecision.findUnique({ where: { teamId_eventId: { teamId, eventId } } })
       if (existingDecision) throw new Error("You have already made a decision for this event.")
 
-      // Cost deduction (only immediately deduct if there's a cost)
-      let cost = choiceData.cost || 0
-      if (team.balance < cost) throw new Error("Insufficient cash reserve for this choice.")
-      
       let updatedTeam = team
-      if (cost > 0) {
-        updatedTeam = await tx.team.update({
-          where: { id: teamId },
-          data: { balance: { decrement: cost } }
-        })
+      
+      // V6 Engine: Good Event Fee Calculation
+      if (logic.type === 'growth') {
+        const p = team.portfolio.find(x => x.stockSymbol === logic.target);
+        if (!p || p.shares === 0) {
+          throw new Error(`You must own shares in ${logic.target} to participate in this event.`);
+        }
+        
+        // Fee = 25% of the gain per share
+        const gainPerShare = p.currentPrice * choiceData.move;
+        const feePerShare = gainPerShare * 0.25;
+        let totalFee = feePerShare * p.shares;
+        
+        // Cash guard: if fee is too high, cap it at balance and reduce enrolled shares (as per v6 rule)
+        // However, standard transaction just deducts up to the balance.
+        if (totalFee > team.balance) {
+          totalFee = team.balance; // Pay all remaining cash
+        }
+
+        if (totalFee > 0) {
+          updatedTeam = await tx.team.update({
+            where: { id: teamId },
+            data: { balance: { decrement: totalFee } },
+            include: { portfolio: true }
+          })
+        }
       }
 
-      // Record the decision. We DO NOT apply the percentage multipliers or exits here.
-      // Those are applied by the Admin during the "Reveal" phase trigger.
+      // Record the decision. 
       await tx.teamDecision.create({
         data: { teamId, eventId, choice }
       })

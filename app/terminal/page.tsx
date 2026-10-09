@@ -9,15 +9,15 @@ type Portfolio = { stockSymbol: string, shares: number, currentPrice: number, st
 type Decision = { eventId: number, choice: string };
 
 const goodEvents = [
-  { id: 1, target: 'NOVA', title: 'AI Product Expansion', options: [{ id: 'A', label: 'Aggressive', cost: 300000, effect: '+25% Valuation' }, { id: 'B', label: 'Moderate', cost: 150000, effect: '+12% Valuation' }, { id: 'C', label: 'Pass', cost: 0, effect: 'No Change' }] },
-  { id: 2, target: 'VOLT', title: 'Clean Energy Subsidy Grant', options: [{ id: 'A', label: 'Co-Invest', cost: 200000, effect: '+20% Valuation' }, { id: 'B', label: 'Standard', cost: 100000, effect: '+10% Valuation' }, { id: 'C', label: 'Pass', cost: 0, effect: '-2% Valuation' }] },
-  { id: 3, target: 'FINCO', title: 'Enterprise Banking Contract Win', options: [{ id: 'A', label: 'Fund Scale-Up', cost: 250000, effect: '+22% Valuation' }, { id: 'B', label: 'Maintain Capacity', cost: 100000, effect: '+9% Valuation' }, { id: 'C', label: 'Pass', cost: 0, effect: 'No Change' }] }
+  { id: 1, target: 'NOVA', title: 'Enterprise AI Expansion', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+30% Valuation' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+15% Valuation' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] },
+  { id: 2, target: 'VOLT', title: 'National EV Subsidy', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+22% Valuation' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+11% Valuation' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] },
+  { id: 3, target: 'FINCO', title: 'Banking Rate Cut', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+18% Valuation' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+9% Valuation' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] }
 ];
 
 const badEvents = [
-  { id: 4, target: 'NOVA', title: 'Data Privacy Regulation Shock', options: [{ id: 'A', label: 'HOLD', cost: 0, effect: '-15% Valuation' }, { id: 'B', label: 'EXIT (Liquidate)', cost: 0, effect: 'Auto-Sell @ Current Price' }, { id: 'C', label: 'DOUBLE DOWN', cost: 100000, effect: '+15% Valuation' }] },
-  { id: 5, target: 'SHIPX', title: 'Fuel Price Spike & Route Disruption', options: [{ id: 'A', label: 'HOLD', cost: 0, effect: '-12% Valuation' }, { id: 'B', label: 'EXIT (Liquidate)', cost: 0, effect: 'Auto-Sell @ Current Price' }, { id: 'C', label: 'HEDGE', cost: 100000, effect: '+5% Valuation' }] },
-  { id: 6, target: 'FRESH', title: 'Commodity Shortage Margin Squeeze', options: [{ id: 'A', label: 'HOLD', cost: 0, effect: '-10% Valuation' }, { id: 'B', label: 'EXIT (Liquidate)', cost: 0, effect: 'Auto-Sell @ Current Price' }, { id: 'C', label: 'PIVOT', cost: 150000, effect: '+8% Valuation' }] }
+  { id: 4, target: 'NOVA', title: 'Privacy and Regulatory Crackdown', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-10% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] },
+  { id: 5, target: 'SHIPX', title: 'Supply Chain and Tariff Spike', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-6% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] },
+  { id: 6, target: 'FRESH', title: 'Raw Material and Price Caps', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-4% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] }
 ];
 
 const finalEvent = { id: 7, target: 'ALL', title: 'Deploy Remaining Cash Balance', options: [{ id: 'PATH_1', label: 'Safe Asset', cost: 0, effect: '+5% Yield' }, { id: 'PATH_2', label: 'Balanced Fund', cost: 0, effect: '+12% Yield' }, { id: 'PATH_3', label: 'Aggressive Growth Play', cost: 0, effect: '+25% Yield' }] };
@@ -509,20 +509,19 @@ export default function TerminalPage() {
                       <button 
                         key={opt.id}
                         onClick={() => submitDecision(activeGameEvent.id, opt.id)}
-                        disabled={isTrading || balance < opt.cost}
-                        className={`w-full text-left p-4 rounded-xl border transition-all ${balance < opt.cost ? 'bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed' : 'bg-zinc-800 border-zinc-700 hover:border-blue-500 hover:bg-zinc-800/80 shadow-sm'}`}
+                        disabled={isTrading}
+                        className={`w-full text-left p-4 rounded-xl border transition-all bg-zinc-800 border-zinc-700 hover:border-blue-500 hover:bg-zinc-800/80 shadow-sm`}
                       >
                          <div className="flex justify-between items-center mb-1">
                            <span className="font-bold text-white text-lg">{opt.label}</span>
                            <span className="text-xs font-bold bg-zinc-900 px-2 py-1 rounded text-zinc-400">
                              {opt.id}
-                             {balance < opt.cost && <span className="ml-2 text-red-500 border border-red-500 px-1 rounded">Insufficient Cash</span>}
                            </span>
                          </div>
                          <div className="font-mono text-sm text-zinc-400 mt-2 flex flex-col gap-1">
                             <div className="flex justify-between">
                               <span>Cost:</span>
-                              <span className="text-white font-bold">₹{opt.cost.toLocaleString()}</span>
+                              <span className="text-white font-bold">{opt.costText || "Free"}</span>
                             </div>
                             {showOutcomes && (
                               <div className="flex justify-between border-t border-zinc-700/50 pt-2 mt-1">

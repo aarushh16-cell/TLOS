@@ -7,21 +7,18 @@ import { Shield, UserPlus, LogIn, Eye, EyeOff, CheckCircle } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    setSuccess("");
 
-    if (isLogin) {
+    try {
       const res = await signIn("credentials", {
         username,
         password,
@@ -35,41 +32,13 @@ export default function LoginPage() {
           router.push("/terminal");
         }
       } else {
-        setError("Invalid credentials.");
+        // Use the error message returned by auth.ts
+        setError(res?.error || "Invalid credentials.");
         setIsLoading(false);
       }
-    } else {
-      try {
-        const res = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        });
-        
-        const data = await res.json();
-        
-        if (res.ok) {
-          setSuccess("Account created successfully! Logging you in...");
-          // Auto login after signup
-          const signinRes = await signIn("credentials", {
-            username,
-            password,
-            redirect: false,
-          });
-          if (signinRes?.ok) {
-            router.push("/terminal");
-          } else {
-            setError("Signup successful, but login failed.");
-            setIsLoading(false);
-          }
-        } else {
-          setError(data.error || "Signup failed.");
-          setIsLoading(false);
-        }
-      } catch (err) {
-        setError("Network error occurred.");
-        setIsLoading(false);
-      }
+    } catch (err) {
+      setError("Network error occurred.");
+      setIsLoading(false);
     }
   };
 
@@ -82,22 +51,16 @@ export default function LoginPage() {
             <Shield className="text-zinc-300 w-6 h-6" />
           </div>
           <h1 className="text-2xl font-semibold text-[var(--foreground)] tracking-tight">
-            {isLogin ? "Sign in to TLOS" : "Register for TLOS"}
+            Sign in to TLOS
           </h1>
           <p className="text-sm text-zinc-500 mt-2">
-            {isLogin ? "Access your team dashboard" : "Create a new team account"}
+            Access your team dashboard
           </p>
         </div>
         
         {error && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg mb-6 text-sm text-center flex items-center justify-center gap-2">
             {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-emerald-500/10 border border-emerald-500/50 text-emerald-500 p-3 rounded-lg mb-6 text-sm text-center flex items-center justify-center gap-2">
-            <CheckCircle size={16} /> {success}
           </div>
         )}
 
@@ -143,27 +106,11 @@ export default function LoginPage() {
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : isLogin ? (
-              <><LogIn className="w-5 h-5" /> Access Terminal</>
             ) : (
-              <><UserPlus className="w-5 h-5" /> Register Team</>
+              <><LogIn className="w-5 h-5" /> Access Terminal</>
             )}
           </button>
         </form>
-        
-        <div className="mt-8 text-center">
-          <button 
-            type="button"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError("");
-              setSuccess("");
-            }}
-            className="text-sm text-zinc-400 hover:text-emerald-400 transition-colors"
-          >
-            {isLogin ? "Don't have a team yet? Sign up here." : "Already registered? Sign in."}
-          </button>
-        </div>
       </div>
     </div>
   );
