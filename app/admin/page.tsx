@@ -26,6 +26,10 @@ export default function AdminPage() {
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
   const [stockForm, setStockForm] = useState({ symbol: '', name: '', sector: '', currentPrice: 100, riskProfile: 'LOW' });
 
+  // Team Creation
+  const [showTeamForm, setShowTeamForm] = useState(false);
+  const [teamForm, setTeamForm] = useState({ name: '', password: '' });
+
   // Inspector & Evaluator
   const [inspectingTeam, setInspectingTeam] = useState<LeaderboardTeam | null>(null);
   const [judgeBonus, setJudgeBonus] = useState<number>(0);
@@ -107,6 +111,21 @@ export default function AdminPage() {
       fetchState();
       setIsLoading(false);
     });
+  };
+
+  const createTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const res = await fetch('/api/admin/team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ teamName: teamForm.name, password: teamForm.password }) });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      alert(data.error || 'Failed to create team');
+    } else {
+      setTeamForm({ name: '', password: '' });
+      setShowTeamForm(false);
+    }
+    fetchState();
+    setIsLoading(false);
   };
   
   const resetPortfolio = async (teamId: string, teamName: string) => {
@@ -239,9 +258,31 @@ export default function AdminPage() {
               <h2 className="text-base font-bold flex items-center gap-2"><Users size={18} className="text-zinc-400"/> Teams & Leaderboard</h2>
               <div className="flex gap-4 items-center">
                  <span className="text-xs text-zinc-500">{leaderboard.length} Teams Registered</span>
+                 <button onClick={() => setShowTeamForm(!showTeamForm)} className="flex items-center gap-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-sm">
+                   <Plus size={14} /> Create Team
+                 </button>
                  <button onClick={() => resetPortfolio('ALL', 'ALL')} className="text-xs px-2 py-1 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded border border-red-500/30 font-bold transition-all">Reset All Portfolios</button>
               </div>
             </div>
+
+            {showTeamForm && (
+              <div className="p-5 border-b border-[var(--border-color)] bg-zinc-900/50">
+                <form onSubmit={createTeam} className="flex flex-wrap gap-4 items-end">
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="text-xs text-zinc-500 block mb-1 uppercase">Team Name / Username</label>
+                    <input type="text" required value={teamForm.name} onChange={e => setTeamForm({...teamForm, name: e.target.value})} className="bg-[var(--background)] border border-[var(--border-color)] rounded p-2 text-sm w-full" placeholder="e.g. WolfOfWallSt" />
+                  </div>
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="text-xs text-zinc-500 block mb-1 uppercase">Password</label>
+                    <input type="text" required value={teamForm.password} onChange={e => setTeamForm({...teamForm, password: e.target.value})} className="bg-[var(--background)] border border-[var(--border-color)] rounded p-2 text-sm w-full" placeholder="SecurePassword123" />
+                  </div>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setShowTeamForm(false)} className="px-4 py-2 rounded text-sm text-zinc-400 hover:bg-zinc-800">Cancel</button>
+                    <button type="submit" disabled={isLoading} className="px-4 py-2 rounded text-sm bg-white text-black font-bold">Create Team</button>
+                  </div>
+                </form>
+              </div>
+            )}
             
             <div className="flex-1 overflow-y-auto custom-scrollbar bg-[var(--panel-bg)] rounded-b-xl">
               <table className="w-full text-left text-sm">

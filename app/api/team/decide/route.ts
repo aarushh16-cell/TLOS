@@ -48,19 +48,18 @@ export async function POST(req: NextRequest) {
       // V6 Engine: Good Event Fee Calculation
       if (logic.type === 'growth') {
         const p = team.portfolio.find(x => x.stockSymbol === logic.target);
-        if (!p || p.shares === 0) {
-          throw new Error(`You must own shares in ${logic.target} to participate in this event.`);
-        }
         
-        // Fee = 25% of the gain per share
-        const gainPerShare = p.currentPrice * choiceData.move;
-        const feePerShare = gainPerShare * 0.25;
-        let totalFee = feePerShare * p.shares;
-        
-        // Cash guard: if fee is too high, cap it at balance and reduce enrolled shares (as per v6 rule)
-        // However, standard transaction just deducts up to the balance.
-        if (totalFee > team.balance) {
-          totalFee = team.balance; // Pay all remaining cash
+        let totalFee = 0;
+        if (p && p.shares > 0) {
+          // Fee = 25% of the gain per share
+          const gainPerShare = p.currentPrice * choiceData.move;
+          const feePerShare = gainPerShare * 0.25;
+          totalFee = feePerShare * p.shares;
+          
+          // Cash guard: if fee is too high, cap it at balance
+          if (totalFee > team.balance) {
+            totalFee = team.balance;
+          }
         }
 
         if (totalFee > 0) {

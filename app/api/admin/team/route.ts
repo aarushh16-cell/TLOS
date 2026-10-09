@@ -18,3 +18,37 @@ export async function DELETE(req: NextRequest) {
   
   return NextResponse.json({ success: true })
 }
+
+export async function POST(req: NextRequest) {
+  const { teamName, password } = await req.json()
+  
+  if (!teamName || !password) {
+    return NextResponse.json({ error: "Team name and password are required" }, { status: 400 })
+  }
+
+  const existing = await prisma.user.findUnique({ where: { username: teamName } })
+  if (existing) {
+    return NextResponse.json({ error: "Team username already exists" }, { status: 400 })
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          username: teamName,
+          password: password,
+          role: "TEAM"
+        }
+      })
+      await tx.team.create({
+        data: {
+          name: teamName,
+          userId: user.id
+        }
+      })
+    })
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+  }
+}
