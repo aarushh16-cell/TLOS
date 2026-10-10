@@ -176,16 +176,19 @@ export default function TerminalPage() {
   const getPercent = (price: number) => ((price - renderMin) / renderRange) * 100;
 
   // Determine active event
-  const isGoodEvents = phase.startsWith('GOOD_EVENTS');
-  const isBadEvents = phase.startsWith('BAD_EVENTS');
-  const isFinalDecision = phase.startsWith('FINAL_DECISION');
+  const isEventPhase = phase.startsWith('EVENT_');
   
   let activeGameEvent = null;
-  if (isGoodEvents) activeGameEvent = goodEvents.find(e => !decisions.some(d => d.eventId === e.id));
-  if (isBadEvents) activeGameEvent = badEvents.find(e => !decisions.some(d => d.eventId === e.id));
-  if (isFinalDecision) activeGameEvent = !decisions.some(d => d.eventId === 7) ? finalEvent : null;
+  if (isEventPhase) {
+    const eventId = parseInt(phase.replace('_REVEALED', '').split('_')[1]);
+    const allEvents = [...goodEvents, ...badEvents, finalEvent];
+    const event = allEvents.find(e => e.id === eventId);
+    if (event && !decisions.some(d => d.eventId === event.id)) {
+      activeGameEvent = event;
+    }
+  }
 
-  const isDecisionPhase = isGoodEvents || isBadEvents || isFinalDecision;
+  const isDecisionPhase = isEventPhase;
   const optionsRevealed = phase.endsWith('_REVEALED');
 
   return (

@@ -333,19 +333,23 @@ export default function AdminPage() {
               <div className="space-y-3">
                 <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Current Phase: {phase}</h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => changePhase('PORTFOLIO')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: PORTFOLIO</button>
-                  <button onClick={() => changePhase('GOOD_EVENTS')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: GOOD EVENTS</button>
+                  <button onClick={() => changePhase('PORTFOLIO')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300 col-span-2">Set: PORTFOLIO</button>
+                  <button onClick={() => changePhase('EVENT_1')} className="py-2 text-xs font-semibold hover:bg-emerald-900/50 border border-emerald-700/50 rounded text-emerald-400">Set: GOOD 1 (NOVA)</button>
+                  <button onClick={() => changePhase('EVENT_2')} className="py-2 text-xs font-semibold hover:bg-emerald-900/50 border border-emerald-700/50 rounded text-emerald-400">Set: GOOD 2 (VOLT)</button>
+                  <button onClick={() => changePhase('EVENT_3')} className="py-2 text-xs font-semibold hover:bg-emerald-900/50 border border-emerald-700/50 rounded text-emerald-400">Set: GOOD 3 (FINCO)</button>
                   <button onClick={() => changePhase('REVEAL_GOOD')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: REVEAL GOOD</button>
-                  <button onClick={() => changePhase('BAD_EVENTS')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: BAD EVENTS</button>
+                  <button onClick={() => changePhase('EVENT_4')} className="py-2 text-xs font-semibold hover:bg-red-900/50 border border-red-700/50 rounded text-red-400">Set: BAD 1 (NOVA)</button>
+                  <button onClick={() => changePhase('EVENT_5')} className="py-2 text-xs font-semibold hover:bg-red-900/50 border border-red-700/50 rounded text-red-400">Set: BAD 2 (SHIPX)</button>
+                  <button onClick={() => changePhase('EVENT_6')} className="py-2 text-xs font-semibold hover:bg-red-900/50 border border-red-700/50 rounded text-red-400">Set: BAD 3 (FRESH)</button>
                   <button onClick={() => changePhase('REVEAL_BAD')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: REVEAL BAD</button>
-                  <button onClick={() => changePhase('FINAL_DECISION')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: FINAL DECISION</button>
-                  <button onClick={() => changePhase('END')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300 col-span-2">Set: END (DASHBOARD)</button>
+                  <button onClick={() => changePhase('EVENT_7')} className="py-2 text-xs font-semibold hover:bg-blue-900/50 border border-blue-700/50 rounded text-blue-400">Set: FINAL DECISION</button>
+                  <button onClick={() => changePhase('END')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: END</button>
                 </div>
 
                 <div className="mt-2">
                   <button 
                     onClick={() => changePhase(`${phase}_REVEALED`)} 
-                    disabled={phase.endsWith('_REVEALED') || (!phase.startsWith('GOOD_EVENTS') && !phase.startsWith('BAD_EVENTS') && !phase.startsWith('FINAL_DECISION'))}
+                    disabled={phase.endsWith('_REVEALED') || !phase.startsWith('EVENT_')}
                     className="w-full py-2 text-xs font-semibold hover:bg-blue-800 bg-blue-900 border border-blue-700 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Reveal Options to Teams
