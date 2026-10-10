@@ -48,16 +48,22 @@ export async function POST(req: NextRequest) {
             if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * mult } });
           }
           
-          if (eventId === 2) { // Good Event 2: VOLT
-            let mult = choice === 'A' ? 1.22 : (choice === 'B' ? 1.11 : 1.0);
-            const p = getPortfolio('VOLT');
-            if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * mult } });
+          if (eventId === 2) { // Good Event 2: VOLT, SHIPX
+            let multVolt = choice === 'A' ? 1.22 : (choice === 'B' ? 1.11 : 1.0);
+            let multShipx = choice === 'A' ? 1.14 : (choice === 'B' ? 1.07 : 1.0);
+            const pVolt = getPortfolio('VOLT');
+            const pShipx = getPortfolio('SHIPX');
+            if (pVolt) await tx.portfolioItem.update({ where: { id: pVolt.id }, data: { currentPrice: pVolt.currentPrice * multVolt } });
+            if (pShipx) await tx.portfolioItem.update({ where: { id: pShipx.id }, data: { currentPrice: pShipx.currentPrice * multShipx } });
           }
           
-          if (eventId === 3) { // Good Event 3: FINCO
-            let mult = choice === 'A' ? 1.18 : (choice === 'B' ? 1.09 : 1.0);
-            const p = getPortfolio('FINCO');
-            if (p) await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * mult } });
+          if (eventId === 3) { // Good Event 3: FINCO, FRESH
+            let multFinco = choice === 'A' ? 1.18 : (choice === 'B' ? 1.09 : 1.0);
+            let multFresh = choice === 'A' ? 1.10 : (choice === 'B' ? 1.05 : 1.0);
+            const pFinco = getPortfolio('FINCO');
+            const pFresh = getPortfolio('FRESH');
+            if (pFinco) await tx.portfolioItem.update({ where: { id: pFinco.id }, data: { currentPrice: pFinco.currentPrice * multFinco } });
+            if (pFresh) await tx.portfolioItem.update({ where: { id: pFresh.id }, data: { currentPrice: pFresh.currentPrice * multFresh } });
           }
           
           if (eventId === 4) { // Bad Event 1: NOVA

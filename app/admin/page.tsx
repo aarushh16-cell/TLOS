@@ -335,8 +335,8 @@ export default function AdminPage() {
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => changePhase('PORTFOLIO')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300 col-span-2">Set: PORTFOLIO</button>
                   <button onClick={() => changePhase('EVENT_1')} className="py-2 text-xs font-semibold hover:bg-emerald-900/50 border border-emerald-700/50 rounded text-emerald-400">Set: GOOD 1 (NOVA)</button>
-                  <button onClick={() => changePhase('EVENT_2')} className="py-2 text-xs font-semibold hover:bg-emerald-900/50 border border-emerald-700/50 rounded text-emerald-400">Set: GOOD 2 (VOLT)</button>
-                  <button onClick={() => changePhase('EVENT_3')} className="py-2 text-xs font-semibold hover:bg-emerald-900/50 border border-emerald-700/50 rounded text-emerald-400">Set: GOOD 3 (FINCO)</button>
+                  <button onClick={() => changePhase('EVENT_2')} className="py-2 text-xs font-semibold hover:bg-emerald-900/50 border border-emerald-700/50 rounded text-emerald-400">Set: GOOD 2 (VOLT, SHIPX)</button>
+                  <button onClick={() => changePhase('EVENT_3')} className="py-2 text-xs font-semibold hover:bg-emerald-900/50 border border-emerald-700/50 rounded text-emerald-400">Set: GOOD 3 (FINCO, FRESH)</button>
                   <button onClick={() => changePhase('REVEAL_GOOD')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: REVEAL GOOD</button>
                   <button onClick={() => changePhase('EVENT_4')} className="py-2 text-xs font-semibold hover:bg-red-900/50 border border-red-700/50 rounded text-red-400">Set: BAD 1 (NOVA)</button>
                   <button onClick={() => changePhase('EVENT_5')} className="py-2 text-xs font-semibold hover:bg-red-900/50 border border-red-700/50 rounded text-red-400">Set: BAD 2 (SHIPX)</button>

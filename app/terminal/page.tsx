@@ -9,9 +9,9 @@ type Portfolio = { stockSymbol: string, shares: number, currentPrice: number, st
 type Decision = { eventId: number, choice: string };
 
 const goodEvents = [
-  { id: 1, target: 'NOVA', title: 'Good Event 1', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+30% Valuation' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+15% Valuation' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] },
-  { id: 2, target: 'VOLT', title: 'Good Event 2', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+22% Valuation' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+11% Valuation' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] },
-  { id: 3, target: 'FINCO', title: 'Good Event 3', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+18% Valuation' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+9% Valuation' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] }
+  { id: 1, target: 'NOVA', title: 'Enterprise AI Expansion', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+30% Valuation' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+15% Valuation' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] },
+  { id: 2, target: 'VOLT, SHIPX', title: 'National EV Subsidy', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+22% (VOLT), +14% (SHIPX)' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+11% (VOLT), +7% (SHIPX)' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] },
+  { id: 3, target: 'FINCO, FRESH', title: 'Banking Rate Cut', options: [{ id: 'A', label: 'Aggressive', costText: "25% of gain", effect: '+18% (FINCO), +10% (FRESH)' }, { id: 'B', label: 'Moderate', costText: "25% of gain", effect: '+9% (FINCO), +5% (FRESH)' }, { id: 'C', label: 'Pass', costText: "Free", effect: 'No Change' }] }
 ];
 
 const badEvents = [
