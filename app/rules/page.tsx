@@ -44,7 +44,7 @@ export default function RulesPage() {
               <span className="font-bold text-white ml-2">NOVA (Tech), VOLT (EV), MEDIX (Health), FINCO (Bank), FRESH (FMCG), SHIPX (Logistics)</span>.
             </p>
             <p className="text-lg text-zinc-300">
-              <strong className="text-white">Base Valuation:</strong> All companies start at exactly <span className="font-mono font-bold text-white">₹100/share</span>.
+              <strong className="text-white">Base Valuation:</strong> All companies start at exactly <span className="font-mono font-bold text-white">₹1000/share</span>.
             </p>
           </div>
         </section>

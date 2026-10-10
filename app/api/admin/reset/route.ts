@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   
   // Optionally reset stock prices
   await prisma.stock.updateMany({
-    data: { currentPrice: 100 }
+    data: { currentPrice: 1000 }
   })
   
   return NextResponse.json({ success: true })

@@ -24,7 +24,7 @@ export default function AdminPage() {
   // Stock Form
   const [showStockForm, setShowStockForm] = useState(false);
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
-  const [stockForm, setStockForm] = useState({ symbol: '', name: '', sector: '', currentPrice: 100, riskProfile: 'LOW' });
+  const [stockForm, setStockForm] = useState({ symbol: '', name: '', sector: '', currentPrice: 1000, riskProfile: 'LOW' });
 
   // Team Creation
   const [showTeamForm, setShowTeamForm] = useState(false);
@@ -191,7 +191,7 @@ export default function AdminPage() {
       setStockForm({ symbol: stock.symbol, name: stock.name, sector: stock.sector, currentPrice: stock.currentPrice, riskProfile: stock.riskProfile });
     } else {
       setEditingStock(null);
-      setStockForm({ symbol: '', name: '', sector: '', currentPrice: 100, riskProfile: 'LOW' });
+      setStockForm({ symbol: '', name: '', sector: '', currentPrice: 1000, riskProfile: 'LOW' });
     }
     setShowStockForm(true);
   }
