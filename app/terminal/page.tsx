@@ -176,12 +176,17 @@ export default function TerminalPage() {
   const getPercent = (price: number) => ((price - renderMin) / renderRange) * 100;
 
   // Determine active event
+  const isGoodEvents = phase.startsWith('GOOD_EVENTS');
+  const isBadEvents = phase.startsWith('BAD_EVENTS');
+  const isFinalDecision = phase.startsWith('FINAL_DECISION');
+  
   let activeGameEvent = null;
-  if (phase === 'GOOD_EVENTS') activeGameEvent = goodEvents.find(e => !decisions.some(d => d.eventId === e.id));
-  if (phase === 'BAD_EVENTS') activeGameEvent = badEvents.find(e => !decisions.some(d => d.eventId === e.id));
-  if (phase === 'FINAL_DECISION') activeGameEvent = !decisions.some(d => d.eventId === 7) ? finalEvent : null;
+  if (isGoodEvents) activeGameEvent = goodEvents.find(e => !decisions.some(d => d.eventId === e.id));
+  if (isBadEvents) activeGameEvent = badEvents.find(e => !decisions.some(d => d.eventId === e.id));
+  if (isFinalDecision) activeGameEvent = !decisions.some(d => d.eventId === 7) ? finalEvent : null;
 
-  const isDecisionPhase = phase === 'GOOD_EVENTS' || phase === 'BAD_EVENTS' || phase === 'FINAL_DECISION';
+  const isDecisionPhase = isGoodEvents || isBadEvents || isFinalDecision;
+  const optionsRevealed = phase.endsWith('_REVEALED');
 
   return (
     <div className="h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)] font-sans relative">
@@ -479,7 +484,7 @@ export default function TerminalPage() {
             </div>
           )}
 
-          {(phase === 'GOOD_EVENTS' || phase === 'BAD_EVENTS' || phase === 'FINAL_DECISION') && activeGameEvent && (
+          {isDecisionPhase && activeGameEvent && (
              <div className="p-6 flex flex-col h-full bg-blue-900/10">
                 <div className="flex items-center gap-2 mb-6">
                   <ShieldAlert className="text-blue-400" size={20} />
@@ -492,17 +497,25 @@ export default function TerminalPage() {
                     <p className="text-sm font-medium text-zinc-400 mb-6 bg-zinc-800/50 inline-block px-3 py-1 rounded-full border border-zinc-700">Target Asset: <span className="text-white font-bold">{activeGameEvent.target}</span></p>
                   )}
                   
-                  <p className="text-sm text-zinc-300 mb-4">Select your strategic response carefully. Your cash reserves will be deducted immediately, but market outcomes remain hidden until the phase ends.</p>
-                  
-                  <div className="flex justify-end mb-4">
-                    <button 
-                      onClick={() => setShowOutcomes(!showOutcomes)} 
-                      className="text-xs bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 transition-colors"
-                    >
-                      {showOutcomes ? <EyeOff size={14} /> : <Eye size={14} />}
-                      {showOutcomes ? 'Hide Potential Outcomes' : 'Reveal Potential Outcomes'}
-                    </button>
-                  </div>
+                  {!optionsRevealed ? (
+                    <div className="flex flex-col items-center justify-center p-8 bg-black/30 border border-zinc-800 rounded-xl mt-8">
+                      <Clock className="w-12 h-12 text-zinc-500 mb-4 animate-pulse" />
+                      <h4 className="text-lg font-bold text-white mb-2">Awaiting Options</h4>
+                      <p className="text-sm text-zinc-400 text-center">The admin will reveal the available options shortly. Prepare your strategy.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-sm text-zinc-300 mb-4">Select your strategic response carefully. Your cash reserves will be deducted immediately, but market outcomes remain hidden until the phase ends.</p>
+                      
+                      <div className="flex justify-end mb-4">
+                        <button 
+                          onClick={() => setShowOutcomes(!showOutcomes)} 
+                          className="text-xs bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 transition-colors"
+                        >
+                          {showOutcomes ? <EyeOff size={14} /> : <Eye size={14} />}
+                          {showOutcomes ? 'Hide Potential Outcomes' : 'Reveal Potential Outcomes'}
+                        </button>
+                      </div>
 
                   <div className="space-y-4">
                      {activeGameEvent.options.map((opt: any) => (
@@ -533,11 +546,13 @@ export default function TerminalPage() {
                       </button>
                     ))}
                   </div>
+                  </>
+                  )}
                 </div>
              </div>
           )}
 
-          {(phase === 'GOOD_EVENTS' || phase === 'BAD_EVENTS' || phase === 'FINAL_DECISION') && !activeGameEvent && (
+          {isDecisionPhase && !activeGameEvent && (
              <div className="p-6 flex flex-col items-center justify-center h-full text-center">
                 <CheckCircle2 className="text-emerald-500 w-16 h-16 mb-4" />
                 <h2 className="text-xl font-bold text-white mb-2">Decisions Locked</h2>

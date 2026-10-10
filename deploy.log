@@ -1,0 +1,9 @@
+Vercel CLI 54.14.2 (Node.js 24.16.0)
+Retrieving project…
+Deploying aarushh16sb/tlos
+Uploading [--------------------] (0.0B/86B)
+Uploading [====================] (86.0B/86B)
+  Inspect         https://vercel.com/aarushh16sb/tlos/7zzM1P8jYXsCgKqWkPXz7mEhcpdp
+  Production      https://tlos-8cvb7hccf-aarushh16sb.vercel.app
+https://tlos-8cvb7hccf-aarushh16sb.vercel.appBuilding…
+Error: request to https://api.vercel.com/v13/deployments/dpl_7zzM1P8jYXsCgKqWkPXz7mEhcpdp?teamId=team_OurMGMEXXifAwb9swcIkcwSh failed, reason: read EADDRNOTAVAIL

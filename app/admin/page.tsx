@@ -341,6 +341,16 @@ export default function AdminPage() {
                   <button onClick={() => changePhase('FINAL_DECISION')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300">Set: FINAL DECISION</button>
                   <button onClick={() => changePhase('END')} className="py-2 text-xs font-semibold hover:bg-zinc-800 border border-zinc-700 rounded text-zinc-300 col-span-2">Set: END (DASHBOARD)</button>
                 </div>
+
+                <div className="mt-2">
+                  <button 
+                    onClick={() => changePhase(`${phase}_REVEALED`)} 
+                    disabled={phase.endsWith('_REVEALED') || (!phase.startsWith('GOOD_EVENTS') && !phase.startsWith('BAD_EVENTS') && !phase.startsWith('FINAL_DECISION'))}
+                    className="w-full py-2 text-xs font-semibold hover:bg-blue-800 bg-blue-900 border border-blue-700 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Reveal Options to Teams
+                  </button>
+                </div>
                 
                 <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mt-6 mb-2">Resolutions (Apply Decisions)</h3>
                 <div className="space-y-2">

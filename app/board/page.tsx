@@ -148,7 +148,7 @@ export default function BoardPage() {
           </div>
         )}
 
-        {phase === 'GOOD_EVENTS' && (
+        {phase.startsWith('GOOD_EVENTS') && (
           <div className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center bg-blue-900/10">
              <div className="flex flex-col md:flex-row items-center gap-4 mb-10 text-center md:text-left">
                <Newspaper className="text-blue-500 w-12 h-12 md:w-16 md:h-16" />
@@ -164,15 +164,21 @@ export default function BoardPage() {
                     <div className="flex-1">
                       <p className="text-zinc-400 font-bold uppercase tracking-widest mb-1 text-sm">Target Asset: {e.target}</p>
                       <h3 className="text-2xl md:text-3xl font-black text-white mb-6 leading-tight">{e.title}</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {e.options.map(o => (
-                          <div key={o.id} className="bg-black/50 border border-zinc-800 p-4 rounded-lg flex flex-col items-center text-center">
-                            <span className="text-sm font-bold text-zinc-500 mb-1">Option {o.id}</span>
-                            <span className="text-xl font-bold text-white mb-2">{o.label}</span>
-                            <span className="font-mono text-emerald-400 font-bold">Cost: {o.costText}</span>
-                          </div>
-                        ))}
-                      </div>
+                      {phase.endsWith('_REVEALED') ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {e.options.map(o => (
+                            <div key={o.id} className="bg-black/50 border border-zinc-800 p-4 rounded-lg flex flex-col items-center text-center">
+                              <span className="text-sm font-bold text-zinc-500 mb-1">Option {o.id}</span>
+                              <span className="text-xl font-bold text-white mb-2">{o.label}</span>
+                              <span className="font-mono text-emerald-400 font-bold">Cost: {o.costText}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center py-6 bg-black/30 border border-zinc-800 rounded-lg">
+                          <p className="text-zinc-500 font-mono tracking-widest uppercase">Options Awaiting Admin Reveal...</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -180,7 +186,7 @@ export default function BoardPage() {
           </div>
         )}
 
-        {phase === 'BAD_EVENTS' && (
+        {phase.startsWith('BAD_EVENTS') && (
           <div className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center bg-red-900/10">
              <div className="flex flex-col md:flex-row items-center gap-4 mb-10 text-center md:text-left">
                <ShieldAlert className="text-red-500 w-12 h-12 md:w-16 md:h-16 animate-pulse" />
@@ -196,15 +202,21 @@ export default function BoardPage() {
                     <div className="flex-1">
                       <p className="text-red-400/80 font-bold uppercase tracking-widest mb-1 text-sm">Target Asset: {e.target}</p>
                       <h3 className="text-2xl md:text-3xl font-black text-white mb-6 leading-tight">{e.title}</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {e.options.map(o => (
-                          <div key={o.id} className="bg-black/50 border border-red-900/30 p-4 rounded-lg flex flex-col items-center text-center">
-                            <span className="text-sm font-bold text-red-500/70 mb-1">Option {o.id}</span>
-                            <span className="text-xl font-bold text-white mb-2">{o.label}</span>
-                            <span className="font-mono text-red-400 font-bold">{o.costText}</span>
-                          </div>
-                        ))}
-                      </div>
+                      {phase.endsWith('_REVEALED') ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          {e.options.map(o => (
+                            <div key={o.id} className="bg-black/50 border border-red-900/30 p-4 rounded-lg flex flex-col items-center text-center">
+                              <span className="text-sm font-bold text-red-500/70 mb-1">Option {o.id}</span>
+                              <span className="text-xl font-bold text-white mb-2">{o.label}</span>
+                              <span className="font-mono text-red-400 font-bold">{o.costText}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center py-6 bg-black/30 border border-red-900/30 rounded-lg">
+                          <p className="text-red-500/70 font-mono tracking-widest uppercase">Options Awaiting Admin Reveal...</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -212,7 +224,7 @@ export default function BoardPage() {
           </div>
         )}
 
-        {phase === 'FINAL_DECISION' && (
+        {phase.startsWith('FINAL_DECISION') && (
           <div className="flex-1 p-6 md:p-10 flex flex-col items-center justify-center">
              <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-4 text-center">Phase 3: Final Deployment</h2>
              <p className="text-lg md:text-2xl text-zinc-400 mb-10 md:mb-16 text-center">Teams must deploy remaining liquid cash reserves.</p>
@@ -221,14 +233,20 @@ export default function BoardPage() {
                 <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 md:p-10 flex flex-col shadow-2xl">
                   <div className="flex-1">
                     <h3 className="text-2xl md:text-4xl font-black text-white mb-10 text-center leading-tight">{finalEvent.title}</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-                      {finalEvent.options.map(o => (
-                        <div key={o.id} className="bg-black border border-zinc-800 p-8 rounded-xl flex flex-col items-center text-center">
-                          <span className="text-xl font-bold text-white mb-2">{o.label}</span>
-                          <span className="text-zinc-500 text-sm mt-4">Fixed Yield Implementation</span>
-                        </div>
-                      ))}
-                    </div>
+                    {phase.endsWith('_REVEALED') ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                        {finalEvent.options.map(o => (
+                          <div key={o.id} className="bg-black border border-zinc-800 p-8 rounded-xl flex flex-col items-center text-center">
+                            <span className="text-xl font-bold text-white mb-2">{o.label}</span>
+                            <span className="text-zinc-500 text-sm mt-4">Fixed Yield Implementation</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center py-10 bg-black/30 border border-zinc-800 rounded-lg">
+                        <p className="text-zinc-500 font-mono tracking-widest uppercase text-xl">Options Awaiting Admin Reveal...</p>
+                      </div>
+                    )}
                   </div>
                 </div>
              </div>
