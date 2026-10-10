@@ -6,14 +6,14 @@ A full-stack interactive web application for managing the "TLOS: The Market" inv
 
 - **Teams:** Supports multiple competing teams via a secure, admin-controlled login system.
 - **Starting Capital:** Each team begins with **₹10,00,000** (10 Lakhs) liquid cash.
-- **Initial Stock Pool:** There are 6 fictional companies in the market, each starting with 10,000 shares at a base price of **₹100/share**:
+- **Initial Stock Pool:** There are 6 fictional companies in the market, each starting with 10,000 shares at a base price of **₹1000/share**:
   1. NOVA (AI & Tech)
   2. VOLT (EV Vehicles)
   3. MEDIX (Healthcare)
   4. FINCO (Banking)
   5. FRESH (FMCG)
   6. SHIPX (Logistics)
-- **Initial Phase:** Teams buy their starting stock allocations at ₹100/share using their ₹10L capital. Total purchases cannot exceed the balance. Any remaining amount stays as Cash Reserve.
+- **Initial Phase:** Teams buy their starting stock allocations at ₹1000/share using their ₹10L capital. Total purchases cannot exceed the balance. Any remaining amount stays as Cash Reserve.
 
 ## 2. The 4 Phases of Play
 

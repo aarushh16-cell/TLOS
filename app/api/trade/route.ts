@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
         if (stock.availableShares < shares) {
           throw new Error('Not enough shares available in the market')
         }
-        if (currentShares + shares > 2000) {
-          throw new Error(`Holding limit reached! You can only own a maximum of 2,000 shares of ${stock.symbol}.`)
+        if (currentShares + shares > 200) {
+          throw new Error(`Holding limit reached! You can only own a maximum of 200 shares of ${stock.symbol}.`)
         }
         
         updatedTeam = await tx.team.update({ 

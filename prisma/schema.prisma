@@ -35,8 +35,8 @@ model Stock {
   sector          String
   totalShares     Int    @default(40000)
   availableShares Int    @default(40000)
-  startPrice      Float  @default(100)
-  currentPrice    Float  @default(100)
+  startPrice      Float  @default(1000)
+  currentPrice    Float  @default(1000)
   riskProfile     String
 
   transactions    Transaction[]
@@ -58,7 +58,7 @@ model PortfolioItem {
   teamId       String
   stockSymbol  String
   shares       Int    @default(0)
-  currentPrice Float  @default(100)
+  currentPrice Float  @default(1000)
 
   team         Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
   stock        Stock  @relation(fields: [stockSymbol], references: [symbol], onDelete: Cascade)

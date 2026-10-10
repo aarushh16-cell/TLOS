@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState, useMemo, useRef } from "react";
-import { Activity, Briefcase, Clock, Search, TrendingUp, TrendingDown, RefreshCcw, ShieldAlert, CheckCircle2, LogOut, Loader2, Menu, X, Eye, EyeOff } from "lucide-react";
+import { Activity, Briefcase, Clock, Search, TrendingUp, TrendingDown, RefreshCcw, ShieldAlert, CheckCircle2, LogOut, Loader2, Menu, X } from "lucide-react";
 
 type Stock = { symbol: string, name: string, currentPrice: number, availableShares: number, sector: string, riskProfile: string };
 type Portfolio = { stockSymbol: string, shares: number, currentPrice: number, stock?: Stock };
@@ -41,7 +41,7 @@ export default function TerminalPage() {
   const [isTrading, setIsTrading] = useState(false);
   const [isTradingEnabled, setIsTradingEnabled] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showOutcomes, setShowOutcomes] = useState(false);
+
 
   const fetchState = () => {
     fetch('/api/team/state', { cache: 'no-store' }).then(res => res.json()).then(data => {
@@ -97,8 +97,8 @@ export default function TerminalPage() {
   }
 
   const [chartData, setChartData] = useState<{open: number, close: number, high: number, low: number}[]>([]);
-  const lastPriceRef = useRef<number>(100);
-  const currentPriceRef = useRef<number>(100);
+  const lastPriceRef = useRef<number>(1000);
+  const currentPriceRef = useRef<number>(1000);
 
   useEffect(() => {
     if (activeStock) {
@@ -167,7 +167,7 @@ export default function TerminalPage() {
   const estimatedCost = (activeStock?.currentPrice || 0) * parsedQty;
 
   const minPrice = chartData.length > 0 ? Math.min(...chartData.map(c => c.low)) : 0;
-  const maxPrice = chartData.length > 0 ? Math.max(...chartData.map(c => c.high)) : 100;
+  const maxPrice = chartData.length > 0 ? Math.max(...chartData.map(c => c.high)) : 1000;
   const priceRange = maxPrice - minPrice || 1;
   const pad = priceRange * 0.1;
   const renderMin = minPrice - pad;
@@ -510,15 +510,6 @@ export default function TerminalPage() {
                     <>
                       <p className="text-sm text-zinc-300 mb-4">Select your strategic response carefully. Your cash reserves will be deducted immediately, but market outcomes remain hidden until the phase ends.</p>
                       
-                      <div className="flex justify-end mb-4">
-                        <button 
-                          onClick={() => setShowOutcomes(!showOutcomes)} 
-                          className="text-xs bg-blue-900/30 hover:bg-blue-800/50 text-blue-300 border border-blue-500/30 px-3 py-1.5 rounded-full font-semibold flex items-center gap-1.5 transition-colors"
-                        >
-                          {showOutcomes ? <EyeOff size={14} /> : <Eye size={14} />}
-                          {showOutcomes ? 'Hide Potential Outcomes' : 'Reveal Potential Outcomes'}
-                        </button>
-                      </div>
 
                   <div className="space-y-4">
                      {activeGameEvent.options.map((opt: any) => (
@@ -539,12 +530,7 @@ export default function TerminalPage() {
                               <span>Cost:</span>
                               <span className="text-white font-bold">{opt.costText || "Free"}</span>
                             </div>
-                            {showOutcomes && (
-                              <div className="flex justify-between border-t border-zinc-700/50 pt-2 mt-1">
-                                <span>Outcome:</span>
-                                <span className="text-emerald-400 font-bold">{opt.effect}</span>
-                              </div>
-                            )}
+
                          </div>
                       </button>
                     ))}

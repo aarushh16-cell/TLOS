@@ -39,8 +39,8 @@ async function main() {
         sector: st.sector,
         totalShares: 20000,
         availableShares: 20000,
-        startPrice: 100,
-        currentPrice: 100,
+        startPrice: 1000,
+        currentPrice: 1000,
         riskProfile: st.riskProfile
       }
     })
