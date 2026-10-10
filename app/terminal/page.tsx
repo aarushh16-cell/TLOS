@@ -15,9 +15,9 @@ const goodEvents = [
 ];
 
 const badEvents = [
-  { id: 4, target: 'NOVA', title: 'Bad Event 1', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-10% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] },
-  { id: 5, target: 'SHIPX', title: 'Bad Event 2', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-6% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] },
-  { id: 6, target: 'FRESH', title: 'Bad Event 3', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-4% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] }
+  { id: 4, target: 'NOVA, MEDIX', title: 'Regulatory Crackdown', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-10% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] },
+  { id: 5, target: 'SHIPX, VOLT', title: 'Supply Chain Crisis', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-6% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] },
+  { id: 6, target: 'FRESH, FINCO', title: 'Economic Slump', options: [{ id: 'A', label: 'HOLD', costText: "Take Drop", effect: '-4% Valuation' }, { id: 'B', label: 'SELL HALF', costText: "8% Discount", effect: 'Auto-Sell 50% @ Current Price' }, { id: 'C', label: 'EXIT', costText: "8% Discount", effect: 'Auto-Sell All @ Current Price' }] }
 ];
 
 const finalEvent = { id: 7, target: 'ALL', title: 'Deploy Remaining Cash Balance', options: [{ id: 'PATH_1', label: 'Safe Asset', cost: 0, effect: '+5% Yield' }, { id: 'PATH_2', label: 'Balanced Fund', cost: 0, effect: '+12% Yield' }, { id: 'PATH_3', label: 'Aggressive Growth Play', cost: 0, effect: '+25% Yield' }] };

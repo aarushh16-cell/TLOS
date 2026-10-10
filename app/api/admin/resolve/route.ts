@@ -66,58 +66,67 @@ export async function POST(req: NextRequest) {
             if (pFresh) await tx.portfolioItem.update({ where: { id: pFresh.id }, data: { currentPrice: pFresh.currentPrice * multFresh } });
           }
           
-          if (eventId === 4) { // Bad Event 1: NOVA
-            const p = getPortfolio('NOVA');
-            if (p) {
+          if (eventId === 4) { // Bad Event 1: NOVA, MEDIX
+            const p1 = getPortfolio('NOVA');
+            const p2 = getPortfolio('MEDIX');
+            const applyBadLogic = async (p: any, holdMult: number, sellHalfMult: number, exitMult: number) => {
               if (choice === 'A') { // HOLD
-                await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 0.90 } });
-              } else if (choice === 'B') { // SELL HALF (-9% drop)
-                const newPrice = p.currentPrice * 0.91;
+                await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * holdMult } });
+              } else if (choice === 'B') { // SELL HALF
+                const newPrice = p.currentPrice * sellHalfMult;
                 const sharesToSell = Math.floor(p.shares / 2);
                 updatedBalance += (sharesToSell * newPrice);
                 await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: newPrice, shares: p.shares - sharesToSell } });
-              } else if (choice === 'C') { // EXIT (-8% drop)
-                const newPrice = p.currentPrice * 0.92;
+              } else if (choice === 'C') { // EXIT
+                const newPrice = p.currentPrice * exitMult;
                 updatedBalance += (p.shares * newPrice);
                 await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: newPrice, shares: 0 } });
               }
-            }
+            };
+            if (p1) await applyBadLogic(p1, 0.90, 0.91, 0.92);
+            if (p2) await applyBadLogic(p2, 0.90, 0.91, 0.92);
           }
 
-          if (eventId === 5) { // Bad Event 2: SHIPX
-            const p = getPortfolio('SHIPX');
-            if (p) {
+          if (eventId === 5) { // Bad Event 2: SHIPX, VOLT
+            const p1 = getPortfolio('SHIPX');
+            const p2 = getPortfolio('VOLT');
+            const applyBadLogic = async (p: any, holdMult: number, sellHalfMult: number, exitMult: number) => {
               if (choice === 'A') { // HOLD
-                await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 0.94 } });
-              } else if (choice === 'B') { // SELL HALF (-7% drop)
-                const newPrice = p.currentPrice * 0.93;
+                await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * holdMult } });
+              } else if (choice === 'B') { // SELL HALF
+                const newPrice = p.currentPrice * sellHalfMult;
                 const sharesToSell = Math.floor(p.shares / 2);
                 updatedBalance += (sharesToSell * newPrice);
                 await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: newPrice, shares: p.shares - sharesToSell } });
-              } else if (choice === 'C') { // EXIT (-8% drop)
-                const newPrice = p.currentPrice * 0.92;
+              } else if (choice === 'C') { // EXIT
+                const newPrice = p.currentPrice * exitMult;
                 updatedBalance += (p.shares * newPrice);
                 await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: newPrice, shares: 0 } });
               }
-            }
+            };
+            if (p1) await applyBadLogic(p1, 0.94, 0.93, 0.92);
+            if (p2) await applyBadLogic(p2, 0.94, 0.93, 0.92);
           }
 
-          if (eventId === 6) { // Bad Event 3: FRESH
-            const p = getPortfolio('FRESH');
-            if (p) {
+          if (eventId === 6) { // Bad Event 3: FRESH, FINCO
+            const p1 = getPortfolio('FRESH');
+            const p2 = getPortfolio('FINCO');
+            const applyBadLogic = async (p: any, holdMult: number, sellHalfMult: number, exitMult: number) => {
               if (choice === 'A') { // HOLD
-                await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * 0.96 } });
-              } else if (choice === 'B') { // SELL HALF (-6% drop)
-                const newPrice = p.currentPrice * 0.94;
+                await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: p.currentPrice * holdMult } });
+              } else if (choice === 'B') { // SELL HALF
+                const newPrice = p.currentPrice * sellHalfMult;
                 const sharesToSell = Math.floor(p.shares / 2);
                 updatedBalance += (sharesToSell * newPrice);
                 await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: newPrice, shares: p.shares - sharesToSell } });
-              } else if (choice === 'C') { // EXIT (-8% drop)
-                const newPrice = p.currentPrice * 0.92;
+              } else if (choice === 'C') { // EXIT
+                const newPrice = p.currentPrice * exitMult;
                 updatedBalance += (p.shares * newPrice);
                 await tx.portfolioItem.update({ where: { id: p.id }, data: { currentPrice: newPrice, shares: 0 } });
               }
-            }
+            };
+            if (p1) await applyBadLogic(p1, 0.96, 0.94, 0.92);
+            if (p2) await applyBadLogic(p2, 0.96, 0.94, 0.92);
           }
           
           if (eventId === 7) { // Final Event: Deploy Remaining Cash Balance
